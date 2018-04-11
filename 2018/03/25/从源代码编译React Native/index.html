@@ -8,18 +8,18 @@
   <link rel="dns-prefetch" href="http://yoursite.com">
   <title>从源代码编译React Native | rolan的Android之旅</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="从源代码编译React Native 环境准备 Android SDK version 23 (非必须)  SDK build tools version 23.0.1 (非必须)  Android Support Repository &amp;gt;= 17  Android NDK(必须android-ndk-r10e)     ndk安装   android-ndk-r10e下载链接    chm">
+  <meta name="description" content="从源代码编译React Native 环境准备   Android SDK version 23 (非必须) SDK build tools version 23.0.1 (非必须) Android Support Repository &amp;gt;= 17 Android NDK(必须android-ndk-r10e)    ndk安装  android-ndk-r10e下载链接  chmod a+">
 <meta name="keywords" content="技术">
 <meta property="og:type" content="article">
 <meta property="og:title" content="从源代码编译React Native">
 <meta property="og:url" content="http://yoursite.com/2018/03/25/从源代码编译React Native/index.html">
 <meta property="og:site_name" content="rolan的Android之旅">
-<meta property="og:description" content="从源代码编译React Native 环境准备 Android SDK version 23 (非必须)  SDK build tools version 23.0.1 (非必须)  Android Support Repository &amp;gt;= 17  Android NDK(必须android-ndk-r10e)     ndk安装   android-ndk-r10e下载链接    chm">
+<meta property="og:description" content="从源代码编译React Native 环境准备   Android SDK version 23 (非必须) SDK build tools version 23.0.1 (非必须) Android Support Repository &amp;gt;= 17 Android NDK(必须android-ndk-r10e)    ndk安装  android-ndk-r10e下载链接  chmod a+">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-04-11T05:02:55.000Z">
+<meta property="og:updated_time" content="2018-04-11T05:05:32.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="从源代码编译React Native">
-<meta name="twitter:description" content="从源代码编译React Native 环境准备 Android SDK version 23 (非必须)  SDK build tools version 23.0.1 (非必须)  Android Support Repository &amp;gt;= 17  Android NDK(必须android-ndk-r10e)     ndk安装   android-ndk-r10e下载链接    chm">
+<meta name="twitter:description" content="从源代码编译React Native 环境准备   Android SDK version 23 (非必须) SDK build tools version 23.0.1 (非必须) Android Support Repository &amp;gt;= 17 Android NDK(必须android-ndk-r10e)    ndk安装  android-ndk-r10e下载链接  chmod a+">
   
     <link rel="alternative" href="/atom.xml" title="rolan的Android之旅" type="application/atom+xml">
   
@@ -176,55 +176,59 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h4 id="从源代码编译React-Native"><a href="#从源代码编译React-Native" class="headerlink" title="从源代码编译React Native"></a>从源代码编译React Native</h4><ul>
-<li><p>环境准备</p>
-<pre><code>Android SDK version 23 (非必须)
-
-SDK build tools version 23.0.1 (非必须)
-
-Android Support Repository &gt;= 17
-
-Android NDK(必须android-ndk-r10e)
-</code></pre></li>
+<li>环境准备</li>
 </ul>
+<ol>
+<li>Android SDK version 23 (非必须)</li>
+<li>SDK build tools version 23.0.1 (非必须)</li>
+<li>Android Support Repository &gt;= 17</li>
+<li>Android NDK(必须android-ndk-r10e)</li>
+</ol>
 <hr>
 <ul>
-<li><p>ndk安装</p>
-<p>  <a href="http://dl.google.com/android/ndk/android-ndk-r10e-darwin-x86_64.bin" target="_blank" rel="external">android-ndk-r10e下载链接</a></p>
-<p>   chmod a+x android-ndk-r10e-darwin-x86_64.bin （申请权限）</p>
-<p>   ./android-ndk-r10e-darwin-x86_64.bin (切勿用工具解压)</p>
-<p>   指定ndk路径，打开.bash_profile  输入</p>
-   <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">export NDK_ROOT=/Users/wangyang/sdk/android-ndk-r10e</div><div class="line">export PATH=$PATH:$NDK_ROOT</div></pre></td></tr></table></figure>
-</li>
+<li>ndk安装</li>
 </ul>
-<pre><code>source .bash_profile 应用
-
-检查ndk是否配置成功
-
+<p><a href="http://dl.google.com/android/ndk/android-ndk-r10e-darwin-x86_64.bin" target="_blank" rel="external">android-ndk-r10e下载链接</a></p>
+<ol>
+<li>chmod a+x android-ndk-r10e-darwin-x86_64.bin （申请权限）</li>
+<li>./android-ndk-r10e-darwin-x86_64.bin (切勿用工具解压)</li>
+<li><p>指定ndk路径，打开.bash_profile  输入</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">export NDK_ROOT=/Users/wangyang/sdk/android-ndk-r10e</div><div class="line">export PATH=$PATH:$NDK_ROOT</div></pre></td></tr></table></figure>
+</li>
+<li><p>source .bash_profile 应用</p>
+</li>
+<li><p>检查ndk是否配置成功</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">进入： /Users/wangyang/sdk/android-ndk-r10e/samples/hello-jni </div><div class="line">执行 ndk-build  正常编译则表示配置成功</div><div class="line">在project structure中指定ndk的路径</div><div class="line">/Users/wangyang/sdk/android-ndk-r10e</div></pre></td></tr></table></figure>
-</code></pre><hr>
-<ul>
-<li><p>项目文件修改</p>
-<p>  project中 build.gradle添加如下</p>
-  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">classpath &apos;de.undercouch:gradle-download-task:3.1.2&apos;  //此步骤马上执行sync,不然接下来可能会报错</div></pre></td></tr></table></figure>
-<p>  修改settings.gradle</p>
-  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">include &apos;:ReactAndroid&apos;</div><div class="line">project(&apos;:ReactAndroid&apos;).projectDir = new File(settingsDir, &apos;.  ./rn/node_modules/react-native/ReactAndroid&apos;)</div></pre></td></tr></table></figure>
 </li>
+</ol>
+<hr>
+<ul>
+<li>项目文件修改</li>
 </ul>
-<pre><code>app build.gradle 修改
-
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">dependencies&#123;</div><div class="line">       api project(&apos;:ReactAndroid&apos;)</div><div class="line">     此处需要注释掉所有测试相关的依赖</div><div class="line">    &#125;</div><div class="line">configurations.all &#123;</div><div class="line">           exclude group: &apos;com.facebook.react&apos;, module: &apos;react-native&apos;</div><div class="line">     &#125;</div></pre></td></tr></table></figure>
-
-
-ReactAndroid 项目修改
-
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">1.移动与ReactAndroid 同级的 ReactCommon到ReactAndroid（此步可有可无）</div><div class="line">修改 build.gradle &quot;REACT_COMMON_DIR=$projectDir/../ReactCommon&quot; 为&quot;REACT_COMMON_DIR=$projectDir/ReactCommon&quot;,（有两处需修改）</div></pre></td></tr></table></figure>
-</code></pre><ul>
+<ol>
+<li><p>project中 build.gradle添加如下</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">classpath &apos;de.undercouch:gradle-download-task:3.1.2&apos;  //此步骤马上执行sync,不然接下来可能会报错</div></pre></td></tr></table></figure>
+</li>
+<li><p>修改settings.gradle</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">include &apos;:ReactAndroid&apos;</div><div class="line">project(&apos;:ReactAndroid&apos;).projectDir = new File(settingsDir, &apos;.  ./rn/node_modules/react-native/ReactAndroid&apos;)</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<ol>
+<li><p>app build.gradle 修改</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">dependencies&#123;</div><div class="line">       api project(&apos;:ReactAndroid&apos;)</div><div class="line">     此处需要注释掉所有测试相关的依赖</div><div class="line">    &#125;</div><div class="line">configurations.all &#123;</div><div class="line">           exclude group: &apos;com.facebook.react&apos;, module: &apos;react-native&apos;</div><div class="line">     &#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<ol>
+<li><p>ReactAndroid 项目修改</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">1.移动与ReactAndroid 同级的 ReactCommon到ReactAndroid（此步可有可无）</div><div class="line">修改 build.gradle &quot;REACT_COMMON_DIR=$projectDir/../ReactCommon&quot; 为&quot;REACT_COMMON_DIR=$projectDir/ReactCommon&quot;,（有两处需修改）</div></pre></td></tr></table></figure>
+</li>
 <li><p>app第三方本地依赖修改</p>
-<p>  注销掉原来的react-native 依赖</p>
+</li>
+</ol>
+<ul>
+<li><p>注销掉原来的react-native 依赖</p>
   <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">opensourcelibrary moudle中</div><div class="line">//api &apos;com.facebook.react:react-native:+&apos;</div></pre></td></tr></table></figure>
 </li>
-</ul>
-<ul>
 <li><p>第三方本地引入依赖修改 </p>
   <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">com.horcrux.svg 此包整个从组件库中移入主项目中，不然会报找不到react相关的包</div></pre></td></tr></table></figure>
 </li>
@@ -252,7 +256,7 @@ ReactAndroid 项目修改
        into &quot;$thirdPartyNdkDir/jsc&quot;;
   }
 }
-</code></pre> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">   </div><div class="line">*  React 不支持 D8的merge dex工具</div><div class="line">  需要关闭此属性，在project/gradle.properties中</div></pre></td></tr></table></figure>
+</code></pre> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">*  React 不支持 D8的merge dex工具</div><div class="line">  需要关闭此属性，在project/gradle.properties中</div></pre></td></tr></table></figure>
 <p>  android.enableD8=false  默认就是关闭<br>  ```</p>
 </li>
 </ul>
