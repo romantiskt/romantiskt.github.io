@@ -6,20 +6,22 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Hello World | rolan的Android之旅</title>
+  <title>Git 常见命令及其操作 | rolan的Android之旅</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="想开通blog已久，无奈懒癌缠身，正值周一疲劳之际，得空产出这么一个东东，我一直有诗人一样的情怀，常不禁遐想自己漫步于两岸花丛绿地间，观虫草走兽，听山谷青翠空灵，然事与愿违，这一切都活在我的梦里。 好了，正文开始： 这是我个人的第一篇blog,相信应该，可能也不会是最后一篇(^__^)，我打算将生活中的有趣的事，以及学习中比较深刻的见解在这里记录下来。 首先，得给自己立一个小目标：  C++原生">
+  <meta name="description" content="基本Git 命令1. 配置Git     git config --global user.name &amp;quot;YourName&amp;quot;     git config --global user.email &amp;quot;email@example.com&amp;quot;  2. 创建版本库     git init  3. 查看当前版本库的状态     git status  4. 查看当前窗">
 <meta name="keywords" content="技术">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hello World">
-<meta property="og:url" content="http://yoursite.com/2017/09/25/hello-world/index.html">
+<meta property="og:title" content="Git 常见命令及其操作">
+<meta property="og:url" content="http://yoursite.com/2016/05/25/Git常用命令/index.html">
 <meta property="og:site_name" content="rolan的Android之旅">
-<meta property="og:description" content="想开通blog已久，无奈懒癌缠身，正值周一疲劳之际，得空产出这么一个东东，我一直有诗人一样的情怀，常不禁遐想自己漫步于两岸花丛绿地间，观虫草走兽，听山谷青翠空灵，然事与愿违，这一切都活在我的梦里。 好了，正文开始： 这是我个人的第一篇blog,相信应该，可能也不会是最后一篇(^__^)，我打算将生活中的有趣的事，以及学习中比较深刻的见解在这里记录下来。 首先，得给自己立一个小目标：  C++原生">
+<meta property="og:description" content="基本Git 命令1. 配置Git     git config --global user.name &amp;quot;YourName&amp;quot;     git config --global user.email &amp;quot;email@example.com&amp;quot;  2. 创建版本库     git init  3. 查看当前版本库的状态     git status  4. 查看当前窗">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-09-25T12:56:18.000Z">
+<meta property="og:image" content="http://yoursite.com/2016/05/25/Git常用命令/manage_branch.png">
+<meta property="og:updated_time" content="2018-04-11T03:46:14.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hello World">
-<meta name="twitter:description" content="想开通blog已久，无奈懒癌缠身，正值周一疲劳之际，得空产出这么一个东东，我一直有诗人一样的情怀，常不禁遐想自己漫步于两岸花丛绿地间，观虫草走兽，听山谷青翠空灵，然事与愿违，这一切都活在我的梦里。 好了，正文开始： 这是我个人的第一篇blog,相信应该，可能也不会是最后一篇(^__^)，我打算将生活中的有趣的事，以及学习中比较深刻的见解在这里记录下来。 首先，得给自己立一个小目标：  C++原生">
+<meta name="twitter:title" content="Git 常见命令及其操作">
+<meta name="twitter:description" content="基本Git 命令1. 配置Git     git config --global user.name &amp;quot;YourName&amp;quot;     git config --global user.email &amp;quot;email@example.com&amp;quot;  2. 创建版本库     git init  3. 查看当前版本库的状态     git status  4. 查看当前窗">
+<meta name="twitter:image" content="http://yoursite.com/2016/05/25/Git常用命令/manage_branch.png">
   
     <link rel="alternative" href="/atom.xml" title="rolan的Android之旅" type="application/atom+xml">
   
@@ -155,20 +157,20 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-hello-world" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-Git常用命令" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      Hello World
+      Git 常见命令及其操作
     </h1>
   
 
         
-        <a href="/2017/09/25/hello-world/" class="archive-article-date">
-  	<time datetime="2017-09-25T02:36:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-09-25</time>
+        <a href="/2016/05/25/Git常用命令/" class="archive-article-date">
+  	<time datetime="2016-05-25T15:16:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-05-25</time>
 </a>
         
       </header>
@@ -176,36 +178,206 @@
     <div class="article-entry" itemprop="articleBody">
       
         <hr>
-<p>想开通blog已久，无奈懒癌缠身，正值周一疲劳之际，得空产出这么一个东东，我一直有诗人一样的情怀，常不禁遐想自己漫步于两岸花丛绿地间，观虫草走兽，听山谷青翠空灵，然事与愿违，这一切都活在我的梦里。</p>
-<p>好了，正文开始：</p>
-<p>这是我个人的第一篇blog,相信应该，可能也不会是最后一篇(<em>^__^</em>)，我打算将生活中的有趣的事，以及学习中比较深刻的见解在这里记录下来。</p>
-<p>首先，得给自己立一个小目标：</p>
-<ul>
-<li>C++原生游戏开发</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">1.java与native层互调</div><div class="line">2.c++事件响应模型</div><div class="line">3.3D立体渲染</div></pre></td></tr></table></figure>
-<ul>
-<li>es5,6</li>
-<li><p>React Native混合开发</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">1.node基础</div><div class="line">2.es5,6基础，特性</div><div class="line">3.react基础</div><div class="line">4.reduce及其事件模型</div></pre></td></tr></table></figure>
-</li>
-<li><p>组件化探索</p>
-</li>
-<li>Android源码分析</li>
-<li>Java web</li>
-<li>python把玩</li>
-<li>区块链挖掘</li>
-</ul>
-<hr>
-<p>可以看到，要成为一名合格的程序员，还有很长的路要走，况且身为一名Android开发，更是感觉前路遍布荆棘（ps:如果你认为Android很简单，那么证明你还没入门）</p>
-<p>梦想是要有的，万一实现了呢，但是理想也要与现实着地，所以你能看到我列出的目录中，都是时下非常热门的技术和方向，人最不可避免的就是自己的惰性，高中时期在那种大环境下才能做到勉强自律，更不用提毕业工作后面对生活的压力，及其它因素的诱惑。问题既然摆在那，很少有人能有勇气和恒心去解决问题，因为这不是短期投资，你很难在一天或者是一周后看到回报，温水煮青蛙就是这个理，我们务必时时鞭策自己，告诉自己在前面等待自己的是多么美好的未来，对自己痛苦，就是成全自己。</p>
-<p>如果你解决一个问题，你就领先很多人，解决越多问题，你的生活也就会过得更滋润。所以我一直标榜自己是一个“解决问题的人”，但这同时让我失去了创造性。有得有失这不可避免，但是我们要尽量做到在大趋势下不犯错。</p>
-<ul>
-<li><p>总结</p>
-<p>   一不小心立了很多大方向，本人工作还算比较忙，所以可能进度比较慢，但是，你想的没错，我就是喜欢暴饮暴食，一口吃成一个胖子的何许人hahaa…,不过凡事都要有重点，先后之分，所以近期我会在这个大方向内出一篇文章，至于具体讲什么，还请下回分解。</p>
-</li>
-</ul>
+<h5 id="基本Git-命令"><a href="#基本Git-命令" class="headerlink" title="基本Git 命令"></a>基本Git 命令</h5><pre><code>1. 配置Git
+    git config --global user.name &quot;YourName&quot;
+    git config --global user.email &quot;email@example.com&quot;
 
+2. 创建版本库
+    git init
+
+3. 查看当前版本库的状态
+    git status
+
+4. 查看当前窗口的所有log
+    git log --pretty=oneline
+
+5. 查看历史log
+    git reflog
+
+6. 添加文件到暂存区
+    git add readme.txt
+    git add .                                一次添加所有的文件    
+
+7. 提交修改
+    git commit -m &quot;example commit&quot;
+
+8. 版本回退
+    git reset --hard 23230(commit id)       回退到指定版本       
+    git reset --hard HEAD^                  回退到上一个版本
+    git reset --hard HEAD~8                 回退到前8的那个版本
+
+9. 撤销修改
+    git checkout -- readme.md
+
+10. 撤销暂存区(git add)的修改，重新放回工作区
+    git reset HEAD readme.txt
+
+11. 从版本库中删除文件
+    git rm test.txt
+
+12. 对比不同，查看修改的内容
+    git diff readme.txt
+
+13. 删除已经被提交的文件（本地加入ignore，需要删除远程仓库中的）
+    git rm -r build.xml                        从版本库中删除（单个文件）
+    git rm -r build/                        从版本库中删除（整个build目录）
+    git commit -m &quot;ignore commit files&quot;        提交
+    git push origin master                    推送到远程仓库
+14.回滚代码
+    git checkout -b sm v4.9.7      本地建个sm分支跟踪 v4.9.7 tag
+    git push -f origin sm:master   强制把master回滚到 sm 分支（相当于回滚到 4.9.7tag）
+    git branch -D master       删除并重建本地master
+    git checkout -b master --track origin/master
+</code></pre><h5 id="远程仓库"><a href="#远程仓库" class="headerlink" title="远程仓库"></a>远程仓库</h5><pre><code>1. 使用Coding创建一个远程仓库
+
+2. 运行命令
+    git remote add origin https://github.com/googlesamples/android-ndk.git
+
+3. 将本地库的所有内容推送到远程仓库上
+    git push -u origin master    （初次提交）
+    git push origin master        （初次提交后再次提交）
+
+4. 从远程仓库克隆
+    git clone https://github.com/googlesamples/android-ndk.git        （远程 master分支）
+    git clone -b dev https://github.com/googlesamples/android-ndk.git    （远程 dev分支）
+</code></pre><h5 id="分支管理"><a href="#分支管理" class="headerlink" title="分支管理"></a>分支管理</h5><pre><code>1. 创建分支
+    git branch dev
+
+2. 切换分支
+    git checkout dev
+
+3. 创建并切换分支
+    git checkout -b dev
+
+4. 查看当前分支
+    git branch
+
+5. 删除分支
+    git branch -d dev
+
+6. 推送本地的分支到服务器
+    git push origin dev
+
+7. 查看本地与远程的所有分支
+    git branch -a
+
+8. 删除远程分支
+    git push origin --delete dev
+
+9. 删除远程tag
+    git push origin --delete tag tag_1
+</code></pre><h5 id="解决冲突"><a href="#解决冲突" class="headerlink" title="解决冲突"></a>解决冲突</h5><pre><code>1. 使用 git merge dev 合并分支代码时，Git会使用&lt;&lt;&lt;&lt;&lt;&lt;,======,&gt;&gt;&gt;&gt;&gt;&gt;标记处不同分支的内容，
+待我们手动合并冲突后，保存之后重新提交即可完成分支合并
+
+2. 使用命令查看分支合并图
+   git log --graph
+</code></pre><h5 id="分支管理策略"><a href="#分支管理策略" class="headerlink" title="分支管理策略"></a>分支管理策略</h5><p> <img src="manage_branch.png" alt="分支管理策略"></p>
+<pre><code>1. 通常，合并分支时，如果可能，Git会使用Fast forward模式，但在这种模式下，删除分支后，会丢掉分支信息。
+如果要强制禁用Fast forward模式，Git就会在merge时生成一个新的commit，从分支历史就可以看出分支信息。
+
+2. 使用如下命令禁用Fast forward模式
+    git merge --no-ff -m &quot;merge with no-ff&quot; dev
+</code></pre><h5 id="Bug分支"><a href="#Bug分支" class="headerlink" title="Bug分支"></a>Bug分支</h5><pre><code>1. 接到修复代号101bug的任务，创建一个分支issue-101来修复它。但是，当前正在dev上进行的工作还没有提交。
+    存储工作现场，存储之后 git status将没有内容，即工作区是干净的。
+    git stash    存储工作现场
+
+2. 新建分支issue-101修复bug，并合并到master分支。
+    git checkout -b issue-101 
+    git add motifity.java
+    git commit motiffity.java
+    git checkout master
+    git merge --no-ff -m &quot;merged bug fix 101&quot; issue-101
+    git branch -d issue-101
+
+3. 切回dev分支干活，并恢复现场
+    git stash list      查看刚才的工作现场
+    git stash apply     恢复最近的工作现场
+    git stash drop      删除存储的工作现场
+
+4. 一步恢复工作现场，恢复的同时把stash内容也删了
+    git stash pop     
+5. stash的其它命令
+    git stash apply stash@{0}    恢复指定的工作现场
+    git stash show -p stash@{0}   对比指定工作现场与当前所发生的改变
+    git stash show -p            对比最近工作现场与当前所发生的改变
+    git stash save xxxxx         带有指定信息的存储工作现场
+    git stash drop  stash@{0}    抛弃指定的工作现场
+    gut stash branch develop_test  以当前存储的工作现场创建并切换到分支 develop_test
+</code></pre><h5 id="Feature分支"><a href="#Feature分支" class="headerlink" title="Feature分支"></a>Feature分支</h5><pre><code>1. 创建一个分支，用于开发下一代星际飞船
+    git checkout -b feature-vulcan
+
+2. 飞船开发完成，切换到dev分支准备合并
+    git add vulcan
+    git commit -m &quot;feature vulcan&quot;
+    git checkout dev
+
+3. 经费不足，新功能取消
+    git branch -d feature-vulcan    (失败，未经合并的分支)
+    git branch -D feature-vulcan    强制删除
+</code></pre><h5 id="多人协作"><a href="#多人协作" class="headerlink" title="多人协作"></a>多人协作</h5><pre><code>1. 查看远程库信息
+    git remote
+    git remote -v       查看更详细的信息(Git库远程地址)
+
+2. 推送分支
+    git push origin master
+    git push origin dev
+
+    master分支是主分支，因此需要时刻与远程同步；
+    dev分支是开发分支，团队所有成员都需要在上面工作，所以也需要与远程同步；
+    bug分支只用于在本地修复bug，就没有必要推送到远程了，除非老板要看你每周到底修复了几个bug；
+    feature分支是否推送到远程，取决于你是否和你的小伙伴合作在上面开发
+
+3. 抓取（克隆）分支
+    git clone https://github.com/googlesamples/android-ndk.git
+
+    默认情况下，clone下来时，本地只能看到master分支
+    需要从dev分支开发，在本地创建dev分支：
+
+    git checkout -b dev origin/dev
+
+4. 指定本地dev分支与远程origin/dev分支的链接
+    git branch --set-upstream dev origin/dev
+
+5. 从服务器拉取最新内容
+    git pull
+</code></pre><h5 id="标签管理"><a href="#标签管理" class="headerlink" title="标签管理"></a>标签管理</h5><pre><code>1. 创建标签
+    git tag v1.0
+
+2. 查看所有标签
+    git tag
+
+3. 从某次提交创建标签
+    git tag v0.9 82283
+
+4. 带说明文字
+    git tag -a v0.1 -m &quot;version 0.1 released&quot; 2323
+            -a 指定标签名
+            -m 指定说明文字
+
+    git show v0.1   查看说明文字
+
+5. 删除标签
+    git tag -d v1.0
+
+6. 推送标签到远程
+    git push origin v1.0
+
+7. 从远程库删除
+    git push origin :refs/tags/v1.0
+</code></pre><h5 id="忽略文件"><a href="#忽略文件" class="headerlink" title="忽略文件"></a>忽略文件</h5><pre><code>1. 忽略掉Git工作目录中不需要提交的文件，如.class文件。创建.gitignore文件即可
+
+2. 某些时候，无法添加文件到Git
+    git add -f demo.java        -f 强制添加
+
+3. 如果.gitignore写的有问题，使用命令检查 
+    git check-ignore -v demo.java       该命令会告知.gitignore哪里写得有问题
+</code></pre><h5 id="其他配置"><a href="#其他配置" class="headerlink" title="其他配置"></a>其他配置</h5><pre><code>1. 避免每次pull/push都输入账户名与密码。在config文件中加入如下命令
+    [credential]   
+         helper = store
+
+2. Git默认对大小写不明感，加入如下配置命令不忽略大小写
+    git config core.ignorecase false  
+</code></pre>
       
 
       
@@ -295,7 +467,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="http://s.jiathis.com/qrcode.php?url=http://yoursite.com/2017/09/25/hello-world/" alt="微信分享二维码">
+      <img src="http://s.jiathis.com/qrcode.php?url=http://yoursite.com/2016/05/25/Git常用命令/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -309,20 +481,15 @@
   
 <nav id="article-nav">
   
-    <a href="/2017/09/25/程序员的一天/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2017/09/25/hello-world/" id="article-nav-newer" class="article-nav-link-wrap">
       <i class="icon-circle-left"></i>
       <div class="article-nav-title">
         
-          程序员的一天
+          Hello World
         
       </div>
     </a>
   
-  
-    <a href="/2016/05/25/Git常用命令/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">Git 常见命令及其操作</div>
-      <i class="icon-circle-right"></i>
-    </a>
   
 </nav>
 
