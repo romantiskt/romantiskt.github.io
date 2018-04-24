@@ -8,18 +8,18 @@
   <link rel="dns-prefetch" href="http://yoursite.com">
   <title>Flatbuffers使用及其源码浅析 | rolan的Android之旅</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="环境配置 下载flatbuffers源码 1git clone https://github.com/google/flatbuffers.git  cmake （源码中已包含cmake,也可自行下载）  编译出flatc  进入 flatbuffers/121.cmake -G &amp;quot;Unix Makefiles&amp;quot;2.make java层源码支持1231.可以将flatbufff">
+  <meta name="description" content="为什么要用flatbuffers    FlatBuffers (binary) Protocol Buffers LITE Rapid JSON FlatBuffers (JSON) pugixml Raw structs     Decode + Traverse + Dealloc (1 million times, seconds) 0.08 302 583 105 196 0.02">
 <meta name="keywords" content="技术">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Flatbuffers使用及其源码浅析">
 <meta property="og:url" content="http://yoursite.com/2018/04/18/Flatbuffers使用及其源码浅析/index.html">
 <meta property="og:site_name" content="rolan的Android之旅">
-<meta property="og:description" content="环境配置 下载flatbuffers源码 1git clone https://github.com/google/flatbuffers.git  cmake （源码中已包含cmake,也可自行下载）  编译出flatc  进入 flatbuffers/121.cmake -G &amp;quot;Unix Makefiles&amp;quot;2.make java层源码支持1231.可以将flatbufff">
+<meta property="og:description" content="为什么要用flatbuffers    FlatBuffers (binary) Protocol Buffers LITE Rapid JSON FlatBuffers (JSON) pugixml Raw structs     Decode + Traverse + Dealloc (1 million times, seconds) 0.08 302 583 105 196 0.02">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-04-18T11:56:39.000Z">
+<meta property="og:updated_time" content="2018-04-24T12:43:05.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Flatbuffers使用及其源码浅析">
-<meta name="twitter:description" content="环境配置 下载flatbuffers源码 1git clone https://github.com/google/flatbuffers.git  cmake （源码中已包含cmake,也可自行下载）  编译出flatc  进入 flatbuffers/121.cmake -G &amp;quot;Unix Makefiles&amp;quot;2.make java层源码支持1231.可以将flatbufff">
+<meta name="twitter:description" content="为什么要用flatbuffers    FlatBuffers (binary) Protocol Buffers LITE Rapid JSON FlatBuffers (JSON) pugixml Raw structs     Decode + Traverse + Dealloc (1 million times, seconds) 0.08 302 583 105 196 0.02">
   
     <link rel="alternative" href="/atom.xml" title="rolan的Android之旅" type="application/atom+xml">
   
@@ -175,7 +175,103 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h4 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h4><ul>
+        <h4 id="为什么要用flatbuffers"><a href="#为什么要用flatbuffers" class="headerlink" title="为什么要用flatbuffers"></a>为什么要用flatbuffers</h4><table>
+<thead>
+<tr>
+<th></th>
+<th>FlatBuffers (binary)</th>
+<th>Protocol Buffers LITE</th>
+<th>Rapid JSON</th>
+<th>FlatBuffers (JSON)</th>
+<th>pugixml</th>
+<th>Raw structs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Decode + Traverse + Dealloc (1 million times, seconds)</td>
+<td>0.08</td>
+<td>302</td>
+<td>583</td>
+<td>105</td>
+<td>196</td>
+<td>0.02</td>
+</tr>
+<tr>
+<td>Decode / Traverse / Dealloc (breakdown)</td>
+<td>0 / 0.08 / 0</td>
+<td>220 / 0.15 / 81</td>
+<td>294 / 0.9 / 287</td>
+<td>70 / 0.08 / 35</td>
+<td>41 / 3.9 / 150</td>
+<td>0 / 0.02 / 0</td>
+</tr>
+<tr>
+<td>Encode (1 million times, seconds)</td>
+<td>3.2</td>
+<td>185</td>
+<td>650</td>
+<td>169</td>
+<td>273</td>
+<td>0.15</td>
+</tr>
+<tr>
+<td>Wire format size (normal / zlib, bytes)</td>
+<td>344 / 220</td>
+<td>228 / 174</td>
+<td>1475 / 322</td>
+<td>1029 / 298</td>
+<td>1137 / 341</td>
+<td>312 / 187</td>
+</tr>
+<tr>
+<td>Memory needed to store decoded wire (bytes / blocks)</td>
+<td>0 / 0</td>
+<td>760 / 20</td>
+<td>65689 / 4</td>
+<td>328 / 1</td>
+<td>34194 / 3</td>
+<td>0 / 0</td>
+</tr>
+<tr>
+<td>Transient memory allocated during decode (KB)</td>
+<td>0</td>
+<td>1</td>
+<td>131</td>
+<td>4</td>
+<td>34</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Generated source code size (KB)</td>
+<td>4</td>
+<td>61</td>
+<td>0</td>
+<td>4</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Field access in handwritten traversal code</td>
+<td>typed accessors</td>
+<td>typed accessors</td>
+<td>manual error checking</td>
+<td>typed accessors</td>
+<td>manual error checking</td>
+<td>typed but no safety</td>
+</tr>
+<tr>
+<td>Library source code (KB)</td>
+<td>15</td>
+<td>some subset of 3800</td>
+<td>87</td>
+<td>43</td>
+<td>327</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<h4 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h4><ul>
 <li><p>下载flatbuffers源码</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">git clone https://github.com/google/flatbuffers.git</div></pre></td></tr></table></figure>
 </li>
@@ -207,10 +303,14 @@
 <p>根据schme文件编译生成java entity文件<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">flatc -j[--java] sample_schema.fbs</div></pre></td></tr></table></figure></p>
 <p>根据schme文件编译生成c++ 头文件</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">flatc -c[--cpp] sample_schema.fbs</div></pre></td></tr></table></figure>
+<p>根据.proto文件生成.fbs(将protobuffer格式转为flatbuffer)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">flatc --proto Person.proto</div></pre></td></tr></table></figure>
+<p>根据.fbs文件和.bin文件生成json</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">flatc -t schema.fbs -- binary.bin</div></pre></td></tr></table></figure>
 <p>根据schme文件和 json数据文件生成所对应的flatbuffers格式的数据文件</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">flatc -b[--binary] sample_schema.fbs sample_json.json</div></pre></td></tr></table></figure>
 <p>了解其它相关命令<a href="http://google.github.io/flatbuffers/flatbuffers_guide_using_schema_compiler.html" target="_blank" rel="external">官方文档</a></p>
-<h4 id="序列化"><a href="#序列化" class="headerlink" title="序列化"></a>序列化</h4><p>以下面这个scheme为例<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">namespace com.rolan.entity;</div><div class="line">table PeopleList &#123;</div><div class="line">    peoples : [People];</div><div class="line">&#125;</div><div class="line"></div><div class="line">table People &#123;</div><div class="line">    id : string;</div><div class="line">    index : long;</div><div class="line">    guid : string;</div><div class="line">    name : string;</div><div class="line">	gender : string;</div><div class="line">	company : string;</div><div class="line">	email : string;</div><div class="line">	friends : [Friend];</div><div class="line">&#125;</div><div class="line"></div><div class="line">table Friend &#123;</div><div class="line">    id : long;</div><div class="line">    name : string;</div><div class="line">&#125;</div><div class="line"></div><div class="line">root_type PeopleList;</div></pre></td></tr></table></figure></p>
+<h4 id="序列化"><a href="#序列化" class="headerlink" title="序列化"></a>序列化</h4><p>以下面这个scheme为例<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">namespace com.rolan.entity;</div><div class="line">table PeopleList &#123;</div><div class="line">    peoples : [People];</div><div class="line">&#125;</div><div class="line"></div><div class="line">table People &#123;</div><div class="line">    id : string;</div><div class="line">    index : long;</div><div class="line">    guid : string;</div><div class="line">    name : string;</div><div class="line">    gender : string;</div><div class="line">    company : string;</div><div class="line">    email : string;</div><div class="line">    friends : [Friend];</div><div class="line">&#125;</div><div class="line"></div><div class="line">table Friend &#123;</div><div class="line">    id : long;</div><div class="line">    name : string;</div><div class="line">&#125;</div><div class="line"></div><div class="line">root_type PeopleList;</div></pre></td></tr></table></figure></p>
 <p>java层序列化到文件<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div></pre></td><td class="code"><pre><div class="line">FlatBufferBuilder builder = new FlatBufferBuilder(0);</div><div class="line">        int peopleList[] = new int[100];</div><div class="line">        for (int i = 0; i &lt; peopleList.length; i++) &#123;</div><div class="line">            int nameOffect1 = builder.createString(&quot;李四&quot;);</div><div class="line">            int nameOffect2 = builder.createString(&quot;张三&quot;);</div><div class="line">            int nameOffect3 = builder.createString(&quot;王五&quot;);</div><div class="line">            int friends[] = new int[3];</div><div class="line">            friends[0] = Friend.createFriend(builder, 3243544, nameOffect1);</div><div class="line">            friends[1] = Friend.createFriend(builder, 2341423, nameOffect2);</div><div class="line">            friends[2] = Friend.createFriend(builder, 1232432, nameOffect3);</div><div class="line">            int index = builder.createString(&quot;23412243&quot;);</div><div class="line">            int guid = builder.createString(&quot;xnvnsfsd&quot;);</div><div class="line">            int name = builder.createString(&quot;赵钱&quot;);</div><div class="line">            int gender = builder.createString(&quot;男&quot;);</div><div class="line">            int company = builder.createString(&quot;阿里妈妈&quot;);</div><div class="line">            int email = builder.createString(&quot;ye@163.com&quot;);</div><div class="line">            int friendsVector = People.createFriendsVector(builder, friends);</div><div class="line">            People.startPeople(builder);</div><div class="line">            People.addId(builder, index);</div><div class="line">            People.addIndex(builder, 3001);//001会被识别成int</div><div class="line">            People.addGuid(builder, guid);</div><div class="line">            People.addName(builder, name);</div><div class="line">            People.addGender(builder, gender);</div><div class="line">            People.addCompany(builder, company);</div><div class="line">            People.addEmail(builder, email);</div><div class="line">            People.addFriends(builder, friendsVector);</div><div class="line">            peopleList[i] = People.endPeople(builder);</div><div class="line">        &#125;</div><div class="line">        int peoplesVector = PeopleList.createPeoplesVector(builder, peopleList);</div><div class="line">        PeopleList.startPeopleList(builder);</div><div class="line">        PeopleList.addPeoples(builder, peoplesVector);</div><div class="line">        int endPeopleList = PeopleList.endPeopleList(builder);</div><div class="line">        builder.finish(endPeopleList);</div><div class="line"></div><div class="line">        ByteBuffer bb = builder.dataBuffer();</div><div class="line">        File file = new File(getCacheDir() + &quot;/test.bin&quot;);</div><div class="line">        try &#123;</div><div class="line">            FileOutputStream fo = new FileOutputStream(file);</div><div class="line">            fo.write(bb.array(), bb.position(), bb.remaining());</div><div class="line">            fo.close();</div><div class="line">        &#125; catch (FileNotFoundException e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125; catch (IOException e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div></pre></td></tr></table></figure></p>
 <p>java反序列化</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">File file = new File(getCacheDir() + &quot;/test.bin&quot;);</div><div class="line">       try &#123;</div><div class="line">           byte[] bytes = Utils.toByteArray(file);</div><div class="line">           ByteBuffer wrap = ByteBuffer.wrap(bytes);</div><div class="line">           PeopleList rootAsPeopleList = PeopleList.getRootAsPeopleList(wrap);</div><div class="line">           People peoples = rootAsPeopleList.peoples(1);//取第1个</div><div class="line">           String company = peoples.company();</div><div class="line">           int peopleLength = peoples.friendsLength();</div><div class="line">           Toast.makeText(this,peoples.company(),Toast.LENGTH_SHORT).show();</div><div class="line">       &#125; catch (IOException e) &#123;</div><div class="line">           e.printStackTrace();</div><div class="line">       &#125;</div></pre></td></tr></table></figure>
