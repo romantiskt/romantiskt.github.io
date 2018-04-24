@@ -158,9 +158,63 @@
     <article id="post-ProtocolBuffers使用及其源码浅析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/24/ProtocolBuffers使用及其源码浅析/">Flatbuffers使用及其源码浅析</a>
+    </h1>
+  
+
+        
+        <a href="/2018/04/24/ProtocolBuffers使用及其源码浅析/" class="archive-article-date">
+  	<time datetime="2018-04-24T12:30:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-24</time>
+</a>
+        
+      </header>
+    
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <h4 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h4><ul>
+<li>下载Protocol Buffers源码</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">https://github.com/google/protobuf.git</div></pre></td></tr></table></figure>
+<ul>
+<li>编译源码</li>
+</ul>
+<ol>
+<li>进入protobuf/目录下</li>
+<li>./autogen.sh </li>
+<li>./configure </li>
+<li>make</li>
+<li>sudo make install</li>
+</ol>
+<ul>
+<li>执行完上面步骤后即可全局执行protoc命令</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">protoc --version  查看当前版本</div><div class="line">protoc --help     查看命令</div></pre></td></tr></table></figure>
+<ul>
+<li>编写 .proto文件</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">syntax = &quot;proto2&quot;;</div><div class="line">package protocal;</div><div class="line">option java_package = &quot;com.rolan.proto&quot;;</div><div class="line">option java_outer_classname = &quot;PersonEntity&quot;;</div><div class="line">message People &#123;</div><div class="line">    repeated Person person = 1;//可重复的，即数组</div><div class="line">    message Person &#123;</div><div class="line">        required int32 id = 1;</div><div class="line">        required int64 index = 2;</div><div class="line">        optional string guid=3;</div><div class="line">        required string name = 4;</div><div class="line">        optional string gender=5;</div><div class="line">        optional string company=6;</div><div class="line">        optional string email = 7;</div><div class="line">        repeated Friend friend = 8;</div><div class="line"></div><div class="line">        message Friend &#123;</div><div class="line">            required string id = 1;</div><div class="line">            required string name = 4;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>编译出java文件</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">protoc -I=. --java_out=. addressbook.proto</div></pre></td></tr></table></figure>
+<ul>
+<li>java层源码支持</li>
+</ul>
+<p>1.可自行根据源码中protocol/java 编译出jar包<br>2.build.gradle引入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">implementation &apos;com.google.protobuf:protobuf-java:3.5.1&apos;</div></pre></td></tr></table></figure>
+<ul>
+<li>序列化</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">PersonEntity.People.Builder people = PersonEntity.People.newBuilder();</div><div class="line">       for (int i = 0; i &lt; sampleSize; i++) &#123;</div><div class="line">           PersonEntity.People.Person.Builder person = PersonEntity.People.Person.newBuilder();</div><div class="line">           PersonEntity.People.Person.Friend friend1 = PersonEntity.People.Person.Friend.newBuilder().setId(&quot;1111&quot;).setName(&quot;李四&quot;).build();</div><div class="line">           PersonEntity.People.Person.Friend friend2 = PersonEntity.People.Person.Friend.newBuilder().setId(&quot;2222&quot;).setName(&quot;张三&quot;).build();</div><div class="line">           PersonEntity.People.Person.Friend friend3 = PersonEntity.People.Person.Friend.newBuilder().setId(&quot;3333&quot;).setName(&quot;王五&quot;).build();</div><div class="line">           person.setId(i)</div><div class="line">                   .setIndex(i)</div><div class="line">                   .setGuid(&quot;guid&quot; + i)</div><div class="line">                   .setName(&quot;name:&quot; + i)</div><div class="line">                   .setGender(i % 2 == 0 ? &quot;男&quot; : &quot;女&quot;)</div><div class="line">                   .setCompany(&quot;加油宝：&quot; + i)</div><div class="line">                   .setEmail(&quot;sd@.com&quot;)</div><div class="line">                   .addFriend(friend1)</div><div class="line">                   .addFriend(friend2)</div><div class="line">                   .addFriend(friend3)</div><div class="line">                   .build();</div><div class="line">           people.addPerson(person);</div><div class="line">       &#125;</div><div class="line">       PersonEntity.People build = people.build();</div></pre></td></tr></table></figure>
+<ul>
+<li>反序列化</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">byte[] bytes = Utils.toByteArray(file);</div><div class="line">            long startTime = System.currentTimeMillis();</div><div class="line">            PersonEntity.People people = PersonEntity.People.parseFrom(bytes);</div><div class="line">            PersonEntity.People.Person person = people.getPerson(1);</div></pre></td></tr></table></figure>
+
       
 
       
@@ -168,6 +222,17 @@
     <div class="article-info article-info-index">
       
       
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">技术</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
       
 
       
