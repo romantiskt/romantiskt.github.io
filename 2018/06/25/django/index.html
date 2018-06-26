@@ -8,18 +8,18 @@
   <link rel="dns-prefetch" href="http://yoursite.com">
   <title>阿里云Nginx+uwsgi+Django云服务搭建 | rolan的Android之旅</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="环境准备 连接服务器 1ssh root@120.78.181.212  然后输入密码  上传项目文件   123目录要提前建好1.sudo scp -r /Users/wangyang/python/django_demo root@120.78.181.212:/root/python/django_demo2.通过上传至第三方仓库下载(github)  pip安装 1sudo apt-get">
+  <meta name="description" content="前言本文旨在概述搭建一个具有负载均衡，高并发的django服务器的流程，包含环境准备到发布到云服务器及其一些细节的处理，并不包含django服务器的开发(可自行查阅资料),因为笔者大量查阅过网上一些教程，这方面的资料虽然很多，但是很多都会误导新手，而且其中更是错误百出，残差不齐，所以就有了这篇文章，把整个发布的流程记录下来，然而也不敢说此文没有一点错误，这错误会因每个人的生成环境的不一致而有不同的">
 <meta name="keywords" content="技术">
 <meta property="og:type" content="article">
 <meta property="og:title" content="阿里云Nginx+uwsgi+Django云服务搭建">
 <meta property="og:url" content="http://yoursite.com/2018/06/25/django/index.html">
 <meta property="og:site_name" content="rolan的Android之旅">
-<meta property="og:description" content="环境准备 连接服务器 1ssh root@120.78.181.212  然后输入密码  上传项目文件   123目录要提前建好1.sudo scp -r /Users/wangyang/python/django_demo root@120.78.181.212:/root/python/django_demo2.通过上传至第三方仓库下载(github)  pip安装 1sudo apt-get">
+<meta property="og:description" content="前言本文旨在概述搭建一个具有负载均衡，高并发的django服务器的流程，包含环境准备到发布到云服务器及其一些细节的处理，并不包含django服务器的开发(可自行查阅资料),因为笔者大量查阅过网上一些教程，这方面的资料虽然很多，但是很多都会误导新手，而且其中更是错误百出，残差不齐，所以就有了这篇文章，把整个发布的流程记录下来，然而也不敢说此文没有一点错误，这错误会因每个人的生成环境的不一致而有不同的">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-06-25T13:15:10.000Z">
+<meta property="og:updated_time" content="2018-06-26T02:28:29.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="阿里云Nginx+uwsgi+Django云服务搭建">
-<meta name="twitter:description" content="环境准备 连接服务器 1ssh root@120.78.181.212  然后输入密码  上传项目文件   123目录要提前建好1.sudo scp -r /Users/wangyang/python/django_demo root@120.78.181.212:/root/python/django_demo2.通过上传至第三方仓库下载(github)  pip安装 1sudo apt-get">
+<meta name="twitter:description" content="前言本文旨在概述搭建一个具有负载均衡，高并发的django服务器的流程，包含环境准备到发布到云服务器及其一些细节的处理，并不包含django服务器的开发(可自行查阅资料),因为笔者大量查阅过网上一些教程，这方面的资料虽然很多，但是很多都会误导新手，而且其中更是错误百出，残差不齐，所以就有了这篇文章，把整个发布的流程记录下来，然而也不敢说此文没有一点错误，这错误会因每个人的生成环境的不一致而有不同的">
   
     <link rel="alternative" href="/atom.xml" title="rolan的Android之旅" type="application/atom+xml">
   
@@ -175,7 +175,18 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h4 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h4><ul>
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>本文旨在概述搭建一个具有负载均衡，高并发的django服务器的流程，包含环境准备到发布到云服务器及其一些细节的处理，并不包含django服务器的开发(可自行查阅资料),因为笔者大量查阅过<br>网上一些教程，这方面的资料虽然很多，但是很多都会误导新手，而且其中更是错误百出，残差不齐，所以就有了这篇文章，把整个发布的流程记录下来，然而也不敢说此文没有一点错误，这错误会因每个人的生成环境的不一致而有不同的体现，倘若有些错误也是有益的，因为编程本来就是一个不断试错的过程，牛人之所以牛，无非就是踩过的坑比你多而已。</p>
+<ul>
+<li>非常强调:</li>
+</ul>
+<p>==不要使用Python3!==</p>
+<p>==不要使用Python3!==</p>
+<p>==不要使用Python3!==</p>
+<p>如果你要问我原因，我只能说现在远离它，一身轻松，</p>
+<p>==人生苦短，我用python2==</p>
+<h4 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h4><ul>
+<li><p>阿里云服务器一台 ubuntu16.04,本地mac一台</p>
+</li>
 <li><p>连接服务器</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ssh root@120.78.181.212  然后输入密码</div></pre></td></tr></table></figure>
 </li>
@@ -193,20 +204,18 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">sudo apt-get install mysql-server</div><div class="line"> </div><div class="line">apt-get install mysql-client</div><div class="line"> </div><div class="line">sudo apt-get install libmysqlclient-dev</div></pre></td></tr></table></figure>
 <hr>
 <ul>
-<li>搭建虚拟环境<blockquote>
-<p> 安装virtualenvwrapper</p>
-</blockquote>
-</li>
+<li>搭建虚拟环境</li>
 </ul>
+<p>安装virtualenvwrapper(基于virtualenv的管理器)</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">pip install virtualenvwrapper</div></pre></td></tr></table></figure>
-<blockquote>
 <p>查看python命令路径<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">which python     -&gt; /usr/bin/python</div><div class="line">which python3    -&gt; /usr/bin/python3</div></pre></td></tr></table></figure></p>
 <p>配置环境变量<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">=&gt;Mac</div><div class="line">1.在.bash_profile中加入  </div><div class="line">export WORKON_HOME=&apos;~/.virtualenvs&apos;</div><div class="line">source /usr/local/bin/virtualenvwrapper.sh</div><div class="line">2.source .bash_profile</div><div class="line">=&gt;Ubutu</div><div class="line">1.在.bashrc中加入</div><div class="line">export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python2.7 # 这句是为了防止环境变量$PATH中已有其它环境的python，需要换成自己需要的python路径</div><div class="line">export WORKON_HOME=$HOME/.virtualenvs # 放所有虚拟环境的地方</div><div class="line">source /usr/local/bin/virtualenvwrapper.sh</div><div class="line">2.source .bashrc</div></pre></td></tr></table></figure></p>
 <p>常用命令</p>
-</blockquote>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">mkvirtualenv py2  创建环境</div><div class="line">mkvirtualenv --python=/usr/local/python3.5.3/bin/python py2  创建环境</div><div class="line"></div><div class="line">workon 查看当前</div><div class="line"></div><div class="line">workon py2  应用环境</div><div class="line"></div><div class="line">deactivate  退出虚拟环境</div><div class="line"></div><div class="line">rmvirtualenv py2 删除虚拟环境</div></pre></td></tr></table></figure>
 <ul>
-<li>依赖安装<br>1.首先在本地项目生产依赖目录文件<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">pip freeze&gt;requirements.txt</div></pre></td></tr></table></figure>
+<li><p>依赖安装</p>
+<p>1.首先在本地机器 项目生产依赖目录文件(上传项目前完成)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">pip freeze&gt;requirements.txt</div></pre></td></tr></table></figure>
 </li>
 </ul>
 <p>2.在某一环境下安装</p>
@@ -214,10 +223,6 @@
 <p>3.创建数据库</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">mysql -uroot -p****** 进入shell</div><div class="line">show databases; 显示全部数据库</div><div class="line">create database tiantian; 创建数据库</div></pre></td></tr></table></figure>
 <p>4.迁移数据库<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">python manage.py makemigrations</div><div class="line">python manage.py migrate</div></pre></td></tr></table></figure></p>
-<ul>
-<li>安装uwsgi</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">pip install uwsgi</div></pre></td></tr></table></figure>
 <h4 id="配置项目文件"><a href="#配置项目文件" class="headerlink" title="配置项目文件"></a>配置项目文件</h4><ul>
 <li><p>修改setting.py</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ALLOWED_HOSTS = [&apos;*&apos;, ]</div></pre></td></tr></table></figure>
@@ -236,8 +241,12 @@
 </li>
 </ul>
 <h4 id="配置uwsgi"><a href="#配置uwsgi" class="headerlink" title="配置uwsgi"></a>配置uwsgi</h4><ul>
+<li>安装uwsgi</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">pip install uwsgi</div></pre></td></tr></table></figure>
+<ul>
 <li><p>检查uwsgi服务是否正常</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">创建一个test.py</div><div class="line">def application(env, start_response):</div><div class="line">    start_response(&apos;200 OK&apos;, [(&apos;Content-Type&apos;,&apos;text/html&apos;)])</div><div class="line">    return [&quot;Hello World&quot;]  # python2</div><div class="line">    # return [b&quot;Hello World&quot;]  # python3</div><div class="line">    </div><div class="line">uwsgi --http :8000 --wsgi-file test.py 运行</div><div class="line">127.0.0.1：8000  访问</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">创建一个test.py</div><div class="line">def application(env, start_response):</div><div class="line">    start_response(&apos;200 OK&apos;, [(&apos;Content-Type&apos;,&apos;text/html&apos;)])</div><div class="line">    return [&quot;Hello World&quot;]  # python2</div><div class="line">    # return [b&quot;Hello World&quot;]  # python3</div><div class="line">    </div><div class="line">uwsgi --http :8000 --wsgi-file test.py 运行</div><div class="line">127.0.0.1：8000  访问成功则表示服务正常</div></pre></td></tr></table></figure>
 </li>
 <li><p>uwsgi 配置</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">项目文件下创建 uwsgi.ini文件</div><div class="line">[uwsgi]</div><div class="line"># socket = 0:8001 # 使用nginx连接时使用</div><div class="line">http = 0:8080 # 直接做web服务器使用</div><div class="line"></div><div class="line"># 项目目录</div><div class="line">chdir = /root/django_demo</div><div class="line"># 项目中wsgi.py文件的目录</div><div class="line">wsgi-file = /root/django_demo/wsgi.py</div><div class="line"># 主进程</div><div class="line">master = true</div><div class="line"># 多进程&amp;多线程</div><div class="line">processes = 6</div><div class="line">threads = 2</div><div class="line">pidfile=uwsgi.pid #可用来停止服务</div></pre></td></tr></table></figure>
@@ -253,7 +262,7 @@
 <ul>
 <li>配置</li>
 </ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">在项目目录下</div><div class="line">cp /etc/nginx/uwsgi_params .</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">在项目目录下运行下面命令 ，将uwsgi_params拷贝到项目文件夹下</div><div class="line">cp /etc/nginx/uwsgi_params .</div></pre></td></tr></table></figure>
 <ul>
 <li><p>创建 my.nginx.conf</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">upstream django &#123;</div><div class="line">    server    127.0.0.1:8001;</div><div class="line">    # server      unix://home/python/Desktop/project_test/my_sock.sock;</div><div class="line">&#125;</div><div class="line"></div><div class="line">server &#123;</div><div class="line">    listen      8000;  # 端口号</div><div class="line">    server_name 127.0.0.1;  # 服务器 ip 或是域名</div><div class="line">    charset     utf-8;  # 字符集</div><div class="line"></div><div class="line">    # 最大上传限制</div><div class="line">    # client_max_body_size 75M;</div><div class="line"></div><div class="line">    location /media  &#123;</div><div class="line">        alias /home/python/Desktop/project_test/media_common;  # 媒体文件所在文件夹</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    location /static &#123;</div><div class="line">        alias /home/python/Desktop/project_test/static_common;  # 静态文件所在文件夹</div><div class="line">    &#125;</div><div class="line"></div><div class="line"></div><div class="line">    # 将所有非媒体请求转到Django服务器上</div><div class="line">    location / &#123;</div><div class="line">        uwsgi_pass      django;  # 最上方已定义</div><div class="line">        # 将所有参数都转到uwsgi下</div><div class="line">        include         /home/python/Desktop/project_test/uwsgi_params; # uwsgi_params的路径</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
@@ -293,6 +302,12 @@
 <p>创建 pip.conf</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">mkdir ~/.pip</div><div class="line">cd ~/.pip</div><div class="line">touch pip.conf</div></pre></td></tr></table></figure>
 <p>编辑pip.conf,将下面内容copy进文件<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">[global] </div><div class="line">index-url = http://pypi.douban.com/simple </div><div class="line">[install] </div><div class="line">trusted-host=pypi.douban.com</div></pre></td></tr></table></figure></p>
+<ul>
+<li><p>ssh连接工具</p>
+<p>  Mac上可安装Shuttle来进行管理连接</p>
+<p>  Windows安装xshell</p>
+</li>
+</ul>
 
       
 
