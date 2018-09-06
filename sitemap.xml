@@ -2,6 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2018/09/06/gradleplugin/</loc>
+    
+    <lastmod>2018-09-06T10:29:05.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2018/07/04/%E6%97%A5%E5%B8%B8%E7%BA%AA%E8%A6%8101/</loc>
+    
+    <lastmod>2018-07-04T13:13:59.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2018/06/25/django/</loc>
     
     <lastmod>2018-06-26T02:46:29.000Z</lastmod>
