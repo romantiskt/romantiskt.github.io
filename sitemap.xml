@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2018/10/20/Maven%E4%BB%93%E5%BA%93%E9%85%8D%E7%BD%AE/</loc>
+    
+    <lastmod>2018-11-26T10:49:59.338Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2018/09/06/gradleplugin/</loc>
     
     <lastmod>2018-09-06T10:29:05.000Z</lastmod>

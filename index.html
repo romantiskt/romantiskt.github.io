@@ -155,6 +155,134 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-Maven仓库配置" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/10/20/Maven仓库配置/">Maven仓库配置</a>
+    </h1>
+  
+
+        
+        <a href="/2018/10/20/Maven仓库配置/" class="archive-article-date">
+  	<time datetime="2018-10-20T15:53:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-10-20</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本文会介绍三种开发中可用的仓库配置</p>
+<ul>
+<li>本地仓库</li>
+<li>局域网仓库</li>
+<li>JCenter仓库<h4 id="一、本地仓库"><a href="#一、本地仓库" class="headerlink" title="一、本地仓库"></a>一、本地仓库</h4></li>
+</ul>
+<p>1.配置需要生成仓库的module</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">apply plugin: &apos;maven&apos;</div><div class="line"></div><div class="line">uploadArchives&#123;</div><div class="line">    repositories.mavenDeployer&#123;</div><div class="line">        // 配置本地仓库路径，项目根目录下的repository目录中</div><div class="line">        repository(url: uri(&apos;../repository&apos;))</div><div class="line">        pom.groupId = &quot;com.rolan.eventplugin&quot;// 唯一标识（通常为模块包名，也可以任意）</div><div class="line">        pom.artifactId = &quot;eventplugin&quot; // 项目名称（通常为类库模块名称，也可以任意）</div><div class="line">        pom.version = &quot;1.0.0&quot; // 版本号</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">-----或者以下这种方式</div><div class="line">apply plugin: &apos;maven-publish&apos;</div><div class="line">publishing &#123;</div><div class="line">    publications &#123;</div><div class="line">        mavenJava(MavenPublication) &#123;</div><div class="line">            groupId &apos;com.rolan.eventplugin&apos;</div><div class="line">            artifactId &apos;eventplugin&apos;</div><div class="line">            version &apos;1.0.0&apos;</div><div class="line">            from components.java</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">publishing &#123;</div><div class="line">    repositories &#123;</div><div class="line">        maven &#123;</div><div class="line">            // change to point to your repo, e.g. http://my.org/repo</div><div class="line">            url uri(&apos;../maven&apos;)//发布到本地目录中</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>2.发布</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">./gradlew publish</div><div class="line"></div><div class="line">或者可以点击AndroidStudio右边的build中的uploadArchives选项</div></pre></td></tr></table></figure>
+<p>3.使用<br>  经过第二个步骤会在指定的目录下生成仓库，上面我们指定了项目的根目录下的maven<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">  //这里是插件编写的使用方式 如果是module.参考第二种或者第三种使用方法</div><div class="line">【project/build.gradle】</div><div class="line"> classpath &apos;com.rolan.eventplugin:eventplugin:1.0.0&apos;</div><div class="line"> </div><div class="line"> </div><div class="line">【app/build.gradle】</div><div class="line">apply plugin: com.rolan.eventplugin.EventStonePlugin//需要写包名+类名</div></pre></td></tr></table></figure></p>
+<h4 id="二、局域网仓库"><a href="#二、局域网仓库" class="headerlink" title="二、局域网仓库"></a>二、局域网仓库</h4><ul>
+<li><p>下载Nexus3</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">https://www.sonatype.com/download-oss-sonatype</div><div class="line">选择系统对应版本的maven管理</div></pre></td></tr></table></figure>
+</li>
+<li><p>运行</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">mac:</div><div class="line"></div><div class="line">  nexus.properties:配置相关属性</div><div class="line">  ./nexus-2.11.3-01/bin/nexus start 启动服务</div><div class="line">  </div><div class="line">Windows：</div><div class="line">   1.解压，选择不同操作系统对应的目录，如：nexus-2.14.8-01-bundle\nexus-2.14.8-01\bin\jsw\windows-x86-64</div><div class="line">   </div><div class="line">   2.点击console-nexus.bat启动nexus</div></pre></td></tr></table></figure>
+</li>
+<li><p>管理</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">127.0.0.1:8081/nexus</div><div class="line">默认账号：admin/admin123</div></pre></td></tr></table></figure>
+<ul>
+<li>发布</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">apply plugin: &apos;maven&apos;</div><div class="line">task androidSourcesJar(type: Jar) &#123;//打包main目录下代码和资源的 task</div><div class="line">    classifier = &apos;sources&apos;</div><div class="line">    from android.sourceSets.main.java.srcDirs</div><div class="line">&#125;</div><div class="line"></div><div class="line">artifacts &#123;//配置需要上传到maven仓库的文件</div><div class="line">    archives androidSourcesJar</div><div class="line">&#125;</div><div class="line"></div><div class="line">uploadArchives &#123;//上传到Maven仓库的task</div><div class="line">    repositories &#123;</div><div class="line">        mavenDeployer &#123;</div><div class="line">            //指定maven仓库url</div><div class="line">            repository(url: &quot;http://localhost:8081/nexus/content/repositories/releases/&quot;) &#123;</div><div class="line">            //nexus登录默认用户名和密码</div><div class="line">            authentication(userName: &quot;admin&quot;, password: &quot;admin123&quot;)</div><div class="line">            &#125;</div><div class="line">            pom.groupId = &quot;com.rolan.eventplugin&quot;</div><div class="line">            pom.artifactId = &quot;eventplugin&quot; ）</div><div class="line">            pom.version = &quot;1.0.0&quot; // 版本号</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>使用<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">allprojects &#123;</div><div class="line">    repositories &#123;</div><div class="line">        jcenter()</div><div class="line">        maven &#123; </div><div class="line">            url &apos;http://localhost:8081/nexus/content/repositories/releases/&apos; </div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">implementation &apos;com.rolan.eventplugin:eventplugin:1.0.0&apos;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h4 id="二、发布到JCenter"><a href="#二、发布到JCenter" class="headerlink" title="二、发布到JCenter"></a>二、发布到JCenter</h4><ul>
+<li><p>注册账号</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">https://bintray.com  这里要注册开发者账号 不要注册企业账号</div></pre></td></tr></table></figure>
+</li>
+<li><p>创建组织(create organizations)</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">组织id: jyblife</div><div class="line">组织名称：jyb</div></pre></td></tr></table></figure>
+<ul>
+<li><p>创建maven仓库</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">name:maven 写死maven</div><div class="line">仓库类型选择maven</div></pre></td></tr></table></figure>
+</li>
+<li><p>add new package</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">name:eventplugin 对应后面publish里面的artifactId</div><div class="line">version control: 0.0.1</div></pre></td></tr></table></figure>
+</li>
+<li><p>项目配置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">classpath &apos;com.novoda:bintray-release:0.9&apos;</div><div class="line"></div><div class="line">apply plugin: &apos;com.novoda.bintray-release&apos;</div><div class="line"></div><div class="line">publish &#123;</div><div class="line">    userOrg = &apos;组织ID&apos; </div><div class="line">    groupId = &apos;com.rolan.eventplugin&apos; </div><div class="line">    artifactId = &apos;eventplugin&apos; //项目名称 上面add new package中的name</div><div class="line">    publishVersion = &apos;1.0.2&apos; //版本号</div><div class="line">    desc = &apos;&apos; </div><div class="line">    website = &apos;&apos; //项目主页，可以不写</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>使用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">allprojects &#123;</div><div class="line">    repositories &#123;</div><div class="line">    google()</div><div class="line">    jcenter()</div><div class="line">    maven &#123; url &apos; https://dl.bintray.com/jyblife/maven&apos; &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"></div><div class="line">implementation &apos;com.rolan.eventplugin:eventplugin:1.0.0&apos;</div></pre></td></tr></table></figure>
+</li>
+<li><p>常见错误</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">1.HTTP/1.1 404 Not Found</div><div class="line">这个一般是 add new package中的name和publish中的artifactId不一致</div><div class="line"></div><div class="line">2.按build提示关掉 lint</div></pre></td></tr></table></figure>
+</li>
+</ul>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">技术</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/10/20/Maven仓库配置/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-gradleplugin" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1458,119 +1586,10 @@
 
 
   
-    <article id="post-hello-world" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/09/25/hello-world/">Hello World</a>
-    </h1>
-  
-
-        
-        <a href="/2016/09/25/hello-world/" class="archive-article-date">
-  	<time datetime="2016-09-25T02:36:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-09-25</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <hr>
-<p>想开通blog已久，无奈懒癌缠身，正值周一疲劳之际，得空产出这么一个东东，我一直有诗人一样的情怀，常不禁遐想自己漫步于两岸花丛绿地间，观虫草走兽，听山谷青翠空灵，然事与愿违，这一切都活在我的梦里。</p>
-<p>好了，正文开始：</p>
-<p>这是我个人的第一篇blog,相信应该，可能也不会是最后一篇(<em>^__^</em>)，我打算将生活中的有趣的事，以及学习中比较深刻的见解在这里记录下来。</p>
-<p>首先，得给自己立一个小目标：</p>
-<ul>
-<li>C++原生游戏开发</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">1.java与native层互调</div><div class="line">2.c++事件响应模型</div><div class="line">3.3D立体渲染</div></pre></td></tr></table></figure>
-<ul>
-<li>es5,6</li>
-<li><p>React Native混合开发</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">1.node基础</div><div class="line">2.es5,6基础，特性</div><div class="line">3.react基础</div><div class="line">4.reduce及其事件模型</div></pre></td></tr></table></figure>
-</li>
-<li><p>组件化探索</p>
-</li>
-<li>Android源码分析</li>
-<li>Java web</li>
-<li>python把玩</li>
-<li>区块链挖掘</li>
-</ul>
-<hr>
-<p>可以看到，要成为一名合格的程序员，还有很长的路要走，况且身为一名Android开发，更是感觉前路遍布荆棘（ps:如果你认为Android很简单，那么证明你还没入门）</p>
-<p>梦想是要有的，万一实现了呢，但是理想也要与现实着地，所以你能看到我列出的目录中，都是时下非常热门的技术和方向，人最不可避免的就是自己的惰性，高中时期在那种大环境下才能做到勉强自律，更不用提毕业工作后面对生活的压力，及其它因素的诱惑。问题既然摆在那，很少有人能有勇气和恒心去解决问题，因为这不是短期投资，你很难在一天或者是一周后看到回报，温水煮青蛙就是这个理，我们务必时时鞭策自己，告诉自己在前面等待自己的是多么美好的未来，对自己痛苦，就是成全自己。</p>
-<p>如果你解决一个问题，你就领先很多人，解决越多问题，你的生活也就会过得更滋润。所以我一直标榜自己是一个“解决问题的人”，但这同时让我失去了创造性。有得有失这不可避免，但是我们要尽量做到在大趋势下不犯错。</p>
-<ul>
-<li><p>总结</p>
-<p>   一不小心立了很多大方向，本人工作还算比较忙，所以可能进度比较慢，但是，你想的没错，我就是喜欢暴饮暴食，一口吃成一个胖子的何许人hahaa…,不过凡事都要有重点，先后之分，所以近期我会在这个大方向内出一篇文章，至于具体讲什么，还请下回分解。</p>
-</li>
-<li><p>下面是博客相关的资料</p>
-<p>  Hexo官方网站：</p>
-<p>  <a href="https://hexo.io/" target="_blank" rel="external">https://hexo.io/</a></p>
-<p>  Hexo中文文档：</p>
-<p>  <a href="https://hexo.io/zh-cn/docs/index.html" target="_blank" rel="external">https://hexo.io/zh-cn/docs/index.html</a></p>
-<p>  博客搭建过程</p>
-<p>  <a href="https://linghucong.js.org/2016/04/15/2016-04-15-hexo-github-pages-blog/" target="_blank" rel="external">https://linghucong.js.org/2016/04/15/2016-04-15-hexo-github-pages-blog/</a></p>
-<p>  新增文章：</p>
-<p>  在source/目录下建立 xx.md   然后   hexo generate –deploy  即可自动生成及其上传GitHub</p>
-</li>
-</ul>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">技术</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2016/09/25/hello-world/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
+    <nav id="page-nav">
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+    </nav>
   
 
 

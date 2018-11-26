@@ -6,20 +6,18 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Gradle插件编写与发布和动态修改字节码 | rolan的Android之旅</title>
+  <title>Archives: 2018/10 | rolan的Android之旅</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="GradlePlugin插件可分为三种方式编写，每种方式各有利弊，根据业务逻辑选择  Build Script BuildSrc Project Standalone project 动态获取配置 修改字节码文件  在大多数情况下，我们都是用groovy来编写插件，因为groovy更简洁优雅，如果你不喜欢或是不太熟悉groovy，你也可以用java实现，插件编写支持groovy和java或者ko">
-<meta name="keywords" content="技术">
-<meta property="og:type" content="article">
-<meta property="og:title" content="Gradle插件编写与发布和动态修改字节码">
-<meta property="og:url" content="http://yoursite.com/2018/09/06/gradleplugin/index.html">
+  <meta name="description" content="Android开发者">
+<meta property="og:type" content="website">
+<meta property="og:title" content="rolan的Android之旅">
+<meta property="og:url" content="http://yoursite.com/archives/2018/10/index.html">
 <meta property="og:site_name" content="rolan的Android之旅">
-<meta property="og:description" content="GradlePlugin插件可分为三种方式编写，每种方式各有利弊，根据业务逻辑选择  Build Script BuildSrc Project Standalone project 动态获取配置 修改字节码文件  在大多数情况下，我们都是用groovy来编写插件，因为groovy更简洁优雅，如果你不喜欢或是不太熟悉groovy，你也可以用java实现，插件编写支持groovy和java或者ko">
+<meta property="og:description" content="Android开发者">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-09-06T10:29:05.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Gradle插件编写与发布和动态修改字节码">
-<meta name="twitter:description" content="GradlePlugin插件可分为三种方式编写，每种方式各有利弊，根据业务逻辑选择  Build Script BuildSrc Project Standalone project 动态获取配置 修改字节码文件  在大多数情况下，我们都是用groovy来编写插件，因为groovy更简洁优雅，如果你不喜欢或是不太熟悉groovy，你也可以用java实现，插件编写支持groovy和java或者ko">
+<meta name="twitter:title" content="rolan的Android之旅">
+<meta name="twitter:description" content="Android开发者">
   
     <link rel="alternative" href="/atom.xml" title="rolan的Android之旅" type="application/atom+xml">
   
@@ -155,126 +153,36 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-gradleplugin" class="article article-type-post " itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
+            
   
-    <h1 class="article-title" itemprop="name">
-      Gradle插件编写与发布和动态修改字节码
+  
+    
+    
+      
+      
+      <section class="archives-wrap">
+        <div class="archive-year-wrap">
+          <a href="/archives/2018" class="archive-year">2018</a>
+        </div>
+        <div class="archives">
+    
+    <article class="archive-article archive-type-post">
+  <div class="archive-article-inner">
+    <header class="archive-article-header">
+      	<div class="article-meta">
+	      	<a href="/2018/10/20/Maven仓库配置/" class="archive-article-date">
+  	<time datetime="2018-10-20T15:53:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-10-20</time>
+</a>
+        </div>
+    	 
+  
+    <h1 itemprop="name">
+      <a class="archive-article-title" href="/2018/10/20/Maven仓库配置/">Maven仓库配置</a>
     </h1>
   
 
-        
-        <a href="/2018/09/06/gradleplugin/" class="archive-article-date">
-  	<time datetime="2018-09-06T10:36:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-09-06</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <hr>
-<h1 id="GradlePlugin"><a href="#GradlePlugin" class="headerlink" title="GradlePlugin"></a>GradlePlugin</h1><p>插件可分为三种方式编写，每种方式各有利弊，根据业务逻辑选择</p>
-<ul>
-<li>Build Script</li>
-<li>BuildSrc Project</li>
-<li>Standalone project</li>
-<li>动态获取配置</li>
-<li>修改字节码文件</li>
-</ul>
-<p>在大多数情况下，我们都是用groovy来编写插件，因为groovy更简洁优雅，如果你不喜欢或是不太熟悉groovy，你也可以用java实现，插件编写支持groovy和java或者kotlin同时混编</p>
-<h3 id="Build-Script"><a href="#Build-Script" class="headerlink" title="Build Script"></a>Build Script</h3><p>在模块的build.gradle直接编写脚本代码，仅限于当前moudle,不利于复用</p>
-<ul>
-<li><p>在模块的build.gradle直接创建一个plugin</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * 只可在module的build.gradle定义的plugin</div><div class="line"> */</div><div class="line">class helloWorldPlugin implements Plugin&lt;Project&gt; &#123;</div><div class="line">    void apply(Project project) &#123;</div><div class="line">        project.task(&apos;build-hello&apos;) &#123;//tasks名称</div><div class="line">            group = &quot;android&quot;//tasks所在的组</div><div class="line">            description = &quot;gradle build script demo,shares only in this build.gradle&quot;</div><div class="line">            doLast &#123;</div><div class="line">                println &quot;Hello from the BuildScriptPlugin&quot;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>当前module下build.gradle apply</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">apply plugin: helloWorldPlugin</div></pre></td></tr></table></figure>
-</li>
-</ul>
-<h3 id="BuildSrc-Project"><a href="#BuildSrc-Project" class="headerlink" title="BuildSrc Project"></a>BuildSrc Project</h3><p>在项目建立一个gradle默认会编译的路径，整个项目的moudled都可通用</p>
-<ul>
-<li>创建’rootProjectDir/buildSrc/src/main/groovy’</li>
-<li>编写源码</li>
-<li>apply<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">apply plugin: com.rolan.ProjectBuild//需要写包名+类名</div></pre></td></tr></table></figure>
-</li>
-</ul>
-<h3 id="Standalone-project"><a href="#Standalone-project" class="headerlink" title="Standalone project"></a>Standalone project</h3><ul>
-<li><p>创建一个Android Module</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">1.删除除src/main build.gradle文件外所有内容</div><div class="line">2.清空build.gradle</div><div class="line">3.创建 src/main/groovy/包名 目录</div><div class="line">4.创建 src/main/resources/META-INF/gradle-plugins/com.rolan.eventplugin.EventStone.properties //包名+</div></pre></td></tr></table></figure>
-</li>
-<li><p>添加groovy语言支持</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">apply plugin: &apos;groovy&apos;</div><div class="line"></div><div class="line">dependencies &#123;</div><div class="line">    //gradle sdk</div><div class="line">    compile gradleApi()</div><div class="line">    //groovy sdk</div><div class="line">    compile localGroovy()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>编写插件代码</p>
-</li>
-<li>发布</li>
-</ul>
-<p>1.build.gradle添加如下代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">apply plugin: &apos;maven-publish&apos;</div><div class="line"></div><div class="line">publishing &#123;</div><div class="line">    publications &#123;</div><div class="line">        mavenJava(MavenPublication) &#123;</div><div class="line">            groupId &apos;com.rolan.eventplugin&apos;</div><div class="line">            artifactId &apos;eventplugin&apos;</div><div class="line">            version &apos;1.0.0&apos;</div><div class="line">            from components.java</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">publishing &#123;</div><div class="line">    repositories &#123;</div><div class="line">        maven &#123;</div><div class="line">            // change to point to your repo, e.g. http://my.org/repo</div><div class="line">            url uri(&apos;../maven&apos;)//发布到本地目录中</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>2.gradlew publish 发布<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">注意：记得发布或者升级版本之前不要配置了项目的 classpath,不然会发布错误</div></pre></td></tr></table></figure></p>
-<p>3.依赖<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">【project/build.gradle】</div><div class="line"></div><div class="line"> classpath &apos;com.rolan.eventplugin:eventplugin:1.0.0&apos;</div><div class="line"> </div><div class="line"> </div><div class="line">【app/build.gradle】</div><div class="line"></div><div class="line">apply plugin: com.rolan.eventplugin.EventStonePlugin//需要写包名+类名</div></pre></td></tr></table></figure></p>
-<h3 id="动态获取配置"><a href="#动态获取配置" class="headerlink" title="动态获取配置"></a>动态获取配置</h3><p>  我们经常能看到第三方的项目会要求在build.gradle配置一些参数，这些参数有什么作用，怎么获取</p>
-<ul>
-<li>参数编写<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">class ProjectExtension &#123;//这里首字母一定要大写</div><div class="line">    String name = null</div><div class="line">    String version = null</div><div class="line">&#125;</div><div class="line"></div><div class="line">class ModuleConfig &#123;</div><div class="line">    String name = null</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-</ul>
-<ul>
-<li><p>参数获取与关联</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">//关联</div><div class="line">project.extensions.create(&apos;project_config&apos;, ProjectExtension)//这里会关联到build.gradle中配置的参数</div><div class="line">project_config&#123;&#125;</div><div class="line">       project.extensions.create(&apos;module_config&apos;, ModuleConfig)</div><div class="line">       </div><div class="line">//获取       </div><div class="line">def project_config=project[&apos;project_config&apos;]</div><div class="line">def module_config=project[&apos;module_config&apos;]</div><div class="line"></div><div class="line">println &quot;project_config name:&quot;+project_config.name</div><div class="line">println &quot;project_config version:&quot;+project_config.version</div></pre></td></tr></table></figure>
-</li>
-<li><p>配置</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">apply plugin: com.rolan.ProjectBuild//需要写包名+类名</div><div class="line">------------&gt;这下面两种方式都可以</div><div class="line">project_config&#123;</div><div class="line">    name &quot;GradlePlugin&quot;</div><div class="line">    version &quot;0.0.1&quot;</div><div class="line">    module_config&#123;</div><div class="line">        name &quot;buildSrc module&quot;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div><div class="line"></div><div class="line">project_config&#123;</div><div class="line">    name &quot;GradlePlugin&quot;</div><div class="line">    version &quot;0.0.1&quot;</div><div class="line">&#125;</div><div class="line">module_config&#123;</div><div class="line">         name &quot;buildSrc module&quot;</div><div class="line">     &#125;</div></pre></td></tr></table></figure>
-</li>
-</ul>
-<h3 id="修改字节码文件"><a href="#修改字节码文件" class="headerlink" title="修改字节码文件"></a>修改字节码文件</h3><ul>
-<li><p>Transform的简要书写</p>
-<p>这里暂时没有对字节码文件做修改操作，而是将输入转给了输出，这是必须得基本步骤，因为Transform是一个串联的操作，<br>必须有输入和输出，不然会中断编译</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div></pre></td><td class="code"><pre><div class="line">class EventTransform extends Transform &#123;</div><div class="line"></div><div class="line">    private Project project</div><div class="line"></div><div class="line">    EventTransform(Project project) &#123;</div><div class="line">        this.project = project</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    String getName() &#123;//tasks 名称</div><div class="line">        return &quot;EventStonePlugin&quot;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    Set&lt;QualifiedContent.ContentType&gt; getInputTypes() &#123;//处理的文件类型</div><div class="line">        return TransformManager.CONTENT_CLASS</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    Set&lt;? super QualifiedContent.Scope&gt; getScopes() &#123;//指定task 作用范围</div><div class="line">        return TransformManager.SCOPE_FULL_PROJECT</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    boolean isIncremental() &#123;</div><div class="line">        return false</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException &#123;</div><div class="line">        super.transform(transformInvocation)</div><div class="line">        transformInvocation.inputs.each &#123;</div><div class="line">            it.jarInputs.each &#123;//对类型为jar文件的input进行遍历[第三方依赖]</div><div class="line">                println &quot;*******file_path jarInputs********&quot; + it.file.absolutePath</div><div class="line">                def jarName = it.name</div><div class="line">                def md5Name = DigestUtils.md5Hex(it.file.getAbsolutePath())</div><div class="line">                if (jarName.endsWith(&quot;.jar&quot;)) &#123;</div><div class="line">                    jarName = jarName.substring(0, jarName.length() - 4)</div><div class="line">                &#125;</div><div class="line">                // 获取output目录</div><div class="line">                def dest = transformInvocation.outputProvider.getContentLocation(</div><div class="line">                        jarName + md5Name, it.contentTypes, it.scopes, Format.JAR)</div><div class="line">                FileUtils.copyFile(it.file, dest)</div><div class="line">            &#125;</div><div class="line">            it.directoryInputs.each &#123;</div><div class="line">                //对类型为“文件夹”的input进行遍历[包含书写的类以及R.class、BuildConfig.class以及R$XXX.class等]</div><div class="line">                println &quot;*******file_path directoryInputs********&quot; + it.file.absolutePath</div><div class="line">                // 获取output目录</div><div class="line">                def dest = transformInvocation.outputProvider.getContentLocation(</div><div class="line">                        it.name,</div><div class="line">                        it.contentTypes,</div><div class="line">                        it.scopes,</div><div class="line">                        Format.DIRECTORY)</div><div class="line">                FileUtils.copyDirectory(it.file, dest)</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>在Plugin中注册</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">void apply(Project project) &#123;</div><div class="line">        project.android.registerTransform(new EventTransform(project))</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>操作class文件</p>
-<p>1.迭代文件夹目录，找出需要修改的class</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"> void injectCodeByDir(String path, String rootPath)&#123;</div><div class="line">        try &#123;</div><div class="line">            pool.insertClassPath(path);</div><div class="line">        &#125; catch (NotFoundException e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">        File dir = new File(path);</div><div class="line">        listFiles(dir,rootPath);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    void listFiles(File dir,String rootPath) &#123;</div><div class="line">        if (dir.isDirectory()) &#123;</div><div class="line">           for(File file:dir.listFiles())&#123;</div><div class="line">               listFiles(file, rootPath);</div><div class="line">           &#125;</div><div class="line">        &#125; else &#123;</div><div class="line">            injectCode(dir,rootPath);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    void injectCode(File file,String rootPath) &#123;</div><div class="line">        String filePath = file.getAbsolutePath();</div><div class="line">        if (filePath.endsWith(&quot;.class&quot;)</div><div class="line">                &amp;&amp; !filePath.contains(&quot;R$&quot;)</div><div class="line">                &amp;&amp; !filePath.contains(&quot;R.class&quot;)</div><div class="line">                &amp;&amp; !filePath.contains(&quot;BuildConfig.class&quot;)) &#123;</div><div class="line">            println(&quot;****class file****&quot;+filePath);</div><div class="line">            int index = FileUtil.isSamePackage(filePath, packageName);</div><div class="line">            if(index!=-1)&#123;//未设置packageName默认不检查返回true</div><div class="line">                println(&quot;***************--------***************&quot;+filePath);</div><div class="line">                String className = filePath.substring(index, filePath.length() - 6)</div><div class="line">                        .replace(&apos;\\&apos;, &apos;.&apos;).replace(&apos;/&apos;, &apos;.&apos;);</div><div class="line">                println(&quot;***************----className----***************&quot;+className);</div><div class="line">//                addConstructorMethod(rootPath, className);</div><div class="line">                injectMethod(rootPath,className);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">    &#125;</div></pre></td></tr></table></figure>
-<p>2.为所有类添加构造方法</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">private void addConstructorMethod(String rootPath, String className) &#123;</div><div class="line">       CtClass ctClass = null ;</div><div class="line">       try &#123;</div><div class="line">           ctClass = pool.getCtClass(className);</div><div class="line"> </div><div class="line">           if (ctClass.isFrozen()) &#123;</div><div class="line">               ctClass.defrost();</div><div class="line">           &#125;</div><div class="line">           String body = &quot;System.out.println(\&quot;构造方法\&quot; ); &quot;;</div><div class="line">           CtConstructor[] cts = ctClass.getDeclaredConstructors();</div><div class="line">           if (cts == null || cts.length == 0) &#123;</div><div class="line">               //手动创建一个构造函数</div><div class="line">               CtConstructor constructor = new CtConstructor(new CtClass[0], ctClass);</div><div class="line">               constructor.insertBeforeBody(body);</div><div class="line">               ctClass.addConstructor(constructor);</div><div class="line">           &#125; else &#123;</div><div class="line">               cts[0].insertBeforeBody(body);</div><div class="line">           &#125;</div><div class="line">           ctClass.writeFile(rootPath);</div><div class="line">           ctClass.detach();</div><div class="line">       &#125; catch (Exception e) &#123;</div><div class="line">           e.printStackTrace();</div><div class="line">       &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-<p>3.修改已有方法</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">private void injectMethod(String rootPath,String className) &#123;</div><div class="line">        try &#123;</div><div class="line">            CtClass ctClass = pool.get(className);</div><div class="line">            if (ctClass.isFrozen()) &#123;</div><div class="line">                ctClass.defrost();</div><div class="line">            &#125;</div><div class="line">            for (CtMethod ctmethod : ctClass.getDeclaredMethods()) &#123;</div><div class="line">                String methodName = FileUtil.getSimpleName(ctmethod);</div><div class="line">                println(&quot;----method----&quot;+methodName);</div><div class="line">                if(&quot;onClick&quot;.equals(methodName))&#123;</div><div class="line">                    String body = &quot;System.out.println(\&quot;加入的方法\&quot; ); &quot;;</div><div class="line">                    CtMethod method = ctClass.getDeclaredMethod(&quot;onClick&quot;,new CtClass[]&#123;pool.get(&quot;android.view.View&quot;)&#125;);</div><div class="line">                    method.insertAfter(body);</div><div class="line"></div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            ctClass.writeFile(rootPath);</div><div class="line">            ctClass.detach();</div><div class="line">        &#125; catch (Exception e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
-<p>4.注意</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">project.android.bootClasspath.each &#123;//这里会将android sdk插入进去，因为如果下面需要get android里的类，不然会报notFoundExcetion</div><div class="line">            println &quot;android absolutePath: &quot; + it.absolutePath</div><div class="line">            pool.appendClassPath(it.absolutePath)</div><div class="line">        &#125;</div></pre></td></tr></table></figure></li>
-</ul>
-
-      
-
-      
-        <div class="page-reward">
-          <a href="javascript:;" class="page-reward-btn tooltip-top">
-            <div class="tooltip tooltip-east">
-            <span class="tooltip-item">
-              赏
-            </span>
-            <span class="tooltip-content">
-              <span class="tooltip-text">
-                <span class="tooltip-inner">
-                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
-                  <div class="reward-box">
-                    
-                    
-                  </div>
-                </span>
-              </span>
-            </span>
-          </div>
-          </a>
-        </div>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
+        <div class="article-info info-on-right">
+          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -286,115 +194,19 @@
 		</ul>
 	</div>
 
-      
+          
 
-      
-
-      
-        
-<div class="share-btn share-icons tooltip-left">
-  <div class="tooltip tooltip-east">
-    <span class="tooltip-item">
-      <a href="javascript:;" class="share-sns share-outer">
-        <i class="icon icon-share"></i>
-      </a>
-    </span>
-    <span class="tooltip-content">
-      <div class="share-wrap">
-        <div class="share-icons">
-          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
-            <i class="icon icon-weibo"></i>
-          </a>
-          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
-            <i class="icon icon-weixin"></i>
-          </a>
-          <a class="qq share-sns" href="javascript:;" data-type="qq">
-            <i class="icon icon-qq"></i>
-          </a>
-          <a class="douban share-sns" href="javascript:;" data-type="douban">
-            <i class="icon icon-douban"></i>
-          </a>
-          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
-            <i class="icon icon-qzone"></i>
-          </a>
-          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
-            <i class="icon icon-facebook"></i>
-          </a>
-          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
-            <i class="icon icon-twitter"></i>
-          </a>
-          <a class="google share-sns" href="javascript:;" data-type="google">
-            <i class="icon icon-google"></i>
-          </a>
         </div>
-      </div>
-    </span>
-  </div>
-</div>
-
-<div class="page-modal wx-share js-wx-box">
-    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
-    <p>扫一扫，分享到微信</p>
-    <div class="wx-qrcode">
-      <img src="http://s.jiathis.com/qrcode.php?url=http://yoursite.com/2018/09/06/gradleplugin/" alt="微信分享二维码">
-    </div>
-</div>
-
-<div class="mask js-mask"></div>
-      
-      <div class="clearfix"></div>
-    </div>
+        <div class="clearfix"></div>
+    </header>
   </div>
 </article>
-
-  
-<nav id="article-nav">
-  
-    <a href="/2018/10/20/Maven仓库配置/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          Maven仓库配置
-        
-      </div>
-    </a>
   
   
-    <a href="/2018/07/04/日常纪要01/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">日常纪要之01</div>
-      <i class="icon-circle-right"></i>
-    </a>
-  
-</nav>
-
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-  
-  
+    </div></section>
   
 
-  
-
-  
-
-  
+    
 
 
           </div>
@@ -417,8 +229,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: true,
-		isArchive: false,
+		isPost: false,
+		isArchive: true,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
