@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2019/07/13/%E5%9F%BA%E4%BA%8EASM%E7%9A%84AOP%E7%BC%96%E7%A8%8B/</loc>
+    
+    <lastmod>2019-07-16T06:45:57.088Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2019/04/22/win10+ubuntu18.04%E5%8F%8C%E7%A1%AC%E7%9B%98%E7%B3%BB%E7%BB%9F%E8%B8%A9%E5%9D%91%E6%8C%87%E5%8D%97/</loc>
     
     <lastmod>2019-04-22T07:24:09.448Z</lastmod>
@@ -51,6 +58,20 @@
   </url>
   
   <url>
+    <loc>http://yoursite.com/2016/09/25/hello-world/</loc>
+    
+    <lastmod>2018-04-27T06:09:35.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2017/04/10/Git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/</loc>
+    
+    <lastmod>2018-04-27T06:09:33.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2018/04/18/Flatbuffers/</loc>
     
     <lastmod>2018-04-27T06:09:31.000Z</lastmod>
@@ -58,30 +79,16 @@
   </url>
   
   <url>
+    <loc>http://yoursite.com/2018/03/25/%E4%BB%8E%E6%BA%90%E4%BB%A3%E7%A0%81%E7%BC%96%E8%AF%91React%20Native/</loc>
+    
+    <lastmod>2018-04-27T06:09:27.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2016/12/13/one/</loc>
     
     <lastmod>2018-04-11T07:11:58.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yoursite.com/2016/09/25/hello-world/</loc>
-    
-    <lastmod>2018-04-11T06:56:10.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yoursite.com/2018/03/25/%E4%BB%8E%E6%BA%90%E4%BB%A3%E7%A0%81%E7%BC%96%E8%AF%91React%20Native/</loc>
-    
-    <lastmod>2018-04-11T06:53:15.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yoursite.com/2017/04/10/Git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/</loc>
-    
-    <lastmod>2018-04-11T06:24:58.000Z</lastmod>
     
   </url>
   
