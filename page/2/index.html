@@ -155,6 +155,132 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-从源代码编译React Native" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/25/从源代码编译React Native/">从源代码编译React Native</a>
+    </h1>
+  
+
+        
+        <a href="/2018/03/25/从源代码编译React Native/" class="archive-article-date">
+  	<time datetime="2018-03-25T02:36:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-03-25</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="从源代码编译React-Native"><a href="#从源代码编译React-Native" class="headerlink" title="从源代码编译React Native"></a>从源代码编译React Native</h4><ul>
+<li>环境准备</li>
+</ul>
+<ol>
+<li>Android SDK version 23 (非必须)</li>
+<li>SDK build tools version 23.0.1 (非必须)</li>
+<li>Android Support Repository &gt;= 17</li>
+<li>Android NDK(必须android-ndk-r10e)</li>
+</ol>
+<hr>
+<ul>
+<li>ndk安装</li>
+</ul>
+<p><a href="http://dl.google.com/android/ndk/android-ndk-r10e-darwin-x86_64.bin" target="_blank" rel="external">android-ndk-r10e下载链接</a><br>1.chmod a+x android-ndk-r10e-darwin-x86_64.bin （申请权限）<br>2.”./android-ndk-r10e-darwin-x86_64.bin” (切勿用工具解压)<br>3.指定ndk路径，打开.bash_profile  输入<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">export NDK_ROOT=/Users/wangyang/sdk/android-ndk-r10e</div><div class="line">export PATH=$PATH:$NDK_ROOT</div></pre></td></tr></table></figure></p>
+<p>4.source .bash_profile 应用<br>5.检查ndk是否配置成功<br>   <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">进入： /Users/wangyang/sdk/android-ndk-r10e/samples/hello-jni </div><div class="line">执行 ndk-build  正常编译则表示配置成功</div><div class="line">在project structure中指定ndk的路径</div><div class="line">/Users/wangyang/sdk/android-ndk-r10e</div></pre></td></tr></table></figure></p>
+<hr>
+<ul>
+<li>项目文件修改</li>
+</ul>
+<p>1.project中 build.gradle添加如下</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">classpath &apos;de.undercouch:gradle-download-task:3.1.2&apos;  //此步骤马上执行sync,不然接下来可能会报错</div></pre></td></tr></table></figure>
+</code></pre><p>2.修改settings.gradle</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">include &apos;:ReactAndroid&apos;</div><div class="line">project(&apos;:ReactAndroid&apos;).projectDir = new File(settingsDir, &apos;.  ./rn/node_modules/react-native/ReactAndroid&apos;)</div></pre></td></tr></table></figure>
+</code></pre><p>3.app build.gradle 修改</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">dependencies&#123;</div><div class="line">       api project(&apos;:ReactAndroid&apos;)</div><div class="line">     此处需要注释掉所有测试相关的依赖</div><div class="line">    &#125;</div><div class="line">configurations.all &#123;</div><div class="line">           exclude group: &apos;com.facebook.react&apos;, module: &apos;react-native&apos;</div><div class="line">     &#125;</div></pre></td></tr></table></figure>
+</code></pre><p>4.ReactAndroid 项目修改</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">1.移动与ReactAndroid 同级的 ReactCommon到ReactAndroid（此步可有可无）</div><div class="line">修改 build.gradle &quot;REACT_COMMON_DIR=$projectDir/../ReactCommon&quot; 为&quot;REACT_COMMON_DIR=$projectDir/ReactCommon&quot;,（有两处需修改）</div></pre></td></tr></table></figure>
+</code></pre><p>5.app第三方本地依赖修改</p>
+<ul>
+<li><p>注销掉原来的react-native 依赖</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">opensourcelibrary moudle中</div><div class="line">//api &apos;com.facebook.react:react-native:+&apos;</div></pre></td></tr></table></figure>
+</li>
+<li><p>第三方本地引入依赖修改 </p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">com.horcrux.svg 此包整个从组件库中移入主项目中，不然会报找不到react相关的包</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h4 id="androidStudio-3-0的兼容处理"><a href="#androidStudio-3-0的兼容处理" class="headerlink" title="androidStudio 3.0的兼容处理"></a>androidStudio 3.0的兼容处理</h4><ul>
+<li><p>修改前(ReactAndroid/release.gradle)</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">def getRepositoryUrl() &#123;</div><div class="line">          return hasProperty(&apos;repositoryUrl&apos;) ? property(&apos;repositoryUrl&apos;) : &apos;https://oss.sonatype .org/service/local/staging/deploy/maven2/&apos;</div><div class="line">      &#125;</div><div class="line">      </div><div class="line">def getRepositoryUsername() &#123;</div><div class="line">          return hasProperty(&apos;repositoryUsername&apos;) ? property(&apos;repositoryUsername&apos;) : &apos;&apos;</div><div class="line">      &#125;</div><div class="line">def getRepositoryPassword() &#123;</div><div class="line">          return hasProperty(&apos;repositoryPassword&apos;) ? property(&apos;repositoryPassword&apos;) : &apos;&apos;</div><div class="line">      &#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>修改后</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">def getRepositoryUrl() &#123;</div><div class="line">          return findProperty(&apos;repositoryUrl&apos;) != null ? property(&apos;repositoryUrl&apos;) : &apos;https://oss.sonatype.org/service/local/staging/deploy/maven2/&apos;</div><div class="line">      &#125;</div><div class="line">      </div><div class="line">def getRepositoryUsername() &#123;</div><div class="line">          return findProperty(&apos;repositoryUsername&apos;) !=null ? property(&apos;repositoryUsername&apos;) : &apos;&apos;</div><div class="line">      &#125;</div><div class="line">      </div><div class="line">def getRepositoryPassword() &#123;</div><div class="line">          return findProperty(&apos;repositoryPassword&apos;) != null ? property(&apos;repositoryPassword&apos;) : &apos;&apos;</div><div class="line">      &#125;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h4 id="网络耗时任务的处理"><a href="#网络耗时任务的处理" class="headerlink" title="网络耗时任务的处理"></a>网络耗时任务的处理</h4><p>  下载的文件放入 ReactAndroid/build/downloads下<a href="https://github.com/react-native-community/boost-for-react-native/releases/download/v1.63.0-0/boost_1_63_0.tar.gz" target="_blank" rel="external">boost下载</a></p>
+<p> 正常情况下只需要下载boost，其它的在编译时自动下载，如果下载不成功就采取手动下载，链接的资源如下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">https://github.com/react-native-community/boost-for-react-native/releases/download/v1.63.0-0/boost_1_63_0.tar.gz</div><div class="line">https://github.com/google/double-conversion/archive/v1.1.1.tar.gz</div><div class="line">https://github.com/facebook/folly/archive/v2016.09.26.00.tar.gz</div><div class="line">https://github.com/google/glog/archive/v0.3.3.tar.gz</div><div class="line">https://raw.githubusercontent.com/WebKit/webkit/38b15a3ba3c1b0798f2036f7cea36ffdc096202e/Source/JavaScriptCore/API/</div><div class="line">           头文件只下载此数组中的[&apos;JavaScript.h&apos;, &apos;JSBase.h&apos;, &apos;JSContextRef.h&apos;, &apos;JSObjectRef.h&apos;, &apos;JSRetainPtr.h&apos;, &apos;JSStringRef.h&apos;, &apos;JSValueRef.h&apos;, &apos;WebKitAvailability.h&apos;]</div><div class="line">            下载的头文件放入 downloads/jsc目录下</div></pre></td></tr></table></figure></p>
+<h4 id="其它踩坑指南"><a href="#其它踩坑指南" class="headerlink" title="其它踩坑指南"></a>其它踩坑指南</h4><p>  ReactNative 暂时还不支持新版的 api依赖等方式，所以需要保持 compile<br>  下面这个任务会不通过，因为此任务会去compile中复制一些文件过来</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">task prepareJSC(dependsOn: dependenciesPath ? [] : [downloadJSCHeaders]) &lt;&lt; &#123;</div><div class="line">          copy &#123;</div><div class="line">            from zipTree(configurations.compile.fileCollection &#123; dep -&gt; dep.name == &apos;android-jsc&apos;  &#125;.singleFile)</div><div class="line">            from dependenciesPath ? &quot;$dependenciesPath/jsc-headers&quot; : &#123;downloadJSCHeaders.dest&#125;</div><div class="line">            from &apos;src/main/jni/third-party/jsc/Android.mk&apos;</div><div class="line">               include &apos;jni/**/*.so&apos;, &apos;*.h&apos;, &apos;Android.mk&apos;</div><div class="line">               filesMatching(&apos;*.h&apos;, &#123; fname -&gt; fname.path = &quot;JavaScriptCore/$&#123;fname.path&#125;&quot;&#125;)</div><div class="line">              into &quot;$thirdPartyNdkDir/jsc&quot;;</div><div class="line">         &#125;</div><div class="line">       &#125;</div></pre></td></tr></table></figure>
+</code></pre><ul>
+<li><p>React 不支持 D8的merge dex工具</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">需要关闭此属性，在project/gradle.properties中</div><div class="line">android.enableD8=false  默认就是关闭</div></pre></td></tr></table></figure>
+</li>
+</ul>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">技术</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2018/03/25/从源代码编译React Native/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-Git常用命令" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
