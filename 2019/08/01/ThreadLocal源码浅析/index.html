@@ -6,18 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Archives: 2019 | rolan的Android之旅</title>
+  <title>ThreadLocal源码浅析 | rolan的Android之旅</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Android开发者">
-<meta property="og:type" content="website">
-<meta property="og:title" content="rolan的Android之旅">
-<meta property="og:url" content="http://yoursite.com/archives/2019/index.html">
+  <meta name="description" content="一、概述ThreadLocal是一个实现了在不同线程保持一个变量副本的功能，使得在多线程的情况下，各线程保持的副本不受影响，ThreadLocal的原理很简单，就是在每个线程Thread中维护有一个map变量，我们为副本创建的ThreadLocal作为key,值当做value保存在这个map中，以此来实现线程间副本的独立 123456public static final ThreadLocal&amp;">
+<meta name="keywords" content="技术">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ThreadLocal源码浅析">
+<meta property="og:url" content="http://yoursite.com/2019/08/01/ThreadLocal源码浅析/index.html">
 <meta property="og:site_name" content="rolan的Android之旅">
-<meta property="og:description" content="Android开发者">
+<meta property="og:description" content="一、概述ThreadLocal是一个实现了在不同线程保持一个变量副本的功能，使得在多线程的情况下，各线程保持的副本不受影响，ThreadLocal的原理很简单，就是在每个线程Thread中维护有一个map变量，我们为副本创建的ThreadLocal作为key,值当做value保存在这个map中，以此来实现线程间副本的独立 123456public static final ThreadLocal&amp;">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-08-01T10:44:20.779Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="rolan的Android之旅">
-<meta name="twitter:description" content="Android开发者">
+<meta name="twitter:title" content="ThreadLocal源码浅析">
+<meta name="twitter:description" content="一、概述ThreadLocal是一个实现了在不同线程保持一个变量副本的功能，使得在多线程的情况下，各线程保持的副本不受影响，ThreadLocal的原理很简单，就是在每个线程Thread中维护有一个map变量，我们为副本创建的ThreadLocal作为key,值当做value保存在这个map中，以此来实现线程间副本的独立 123456public static final ThreadLocal&amp;">
   
     <link rel="alternative" href="/atom.xml" title="rolan的Android之旅" type="application/atom+xml">
   
@@ -153,36 +155,83 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
+            <article id="post-ThreadLocal源码浅析" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
   
+    <h1 class="article-title" itemprop="name">
+      ThreadLocal源码浅析
+    </h1>
   
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2019" class="archive-year">2019</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/08/01/ThreadLocal源码浅析/" class="archive-article-date">
+
+        
+        <a href="/2019/08/01/ThreadLocal源码浅析/" class="archive-article-date">
   	<time datetime="2019-08-01T10:33:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-08-01</time>
 </a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/08/01/ThreadLocal源码浅析/">ThreadLocal源码浅析</a>
-    </h1>
-  
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><p>ThreadLocal是一个实现了在不同线程保持一个变量副本的功能，使得在多线程的情况下，各线程保持的副本不受影响，ThreadLocal的原理很简单，就是在每个线程Thread中维护有一个map变量，我们为副本创建的ThreadLocal作为key,值当做value保存在这个map中，以此来实现线程间副本的独立</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">public static final ThreadLocal&lt;Integer&gt; local = new ThreadLocal&lt;Integer&gt;() &#123;</div><div class="line">        @Override</div><div class="line">        protected Integer initialValue() &#123;//可选择实现，是否给一个初始化值，此方法会被延迟调用，在第一次set,get时调用</div><div class="line">            return 0;</div><div class="line">        &#125;</div><div class="line">    &#125;;</div></pre></td></tr></table></figure>
+<h2 id="二、ThreadLocalMap"><a href="#二、ThreadLocalMap" class="headerlink" title="二、ThreadLocalMap"></a>二、ThreadLocalMap</h2><p>&nbsp;&nbsp;ThreadLocal提供了几个核心方法来实现值的存取:<strong>set、get、remove</strong>,这几个方法的实现都依托ThreadLocal中实现的静态内部类ThreadLocalMap；ThreadLocalMap是一个实现map存取功能的包装类，其中Entry类型数组table存储了线程中需要保存副本的数据，初始化长度16,超过3/4时则自动扩容为原来的2倍，Entry使用魔数0x61c88647来实现数组角标的散列<br>&nbsp;&nbsp;每个线程Thread都持有一个ThreadLocalMap实例<strong>threadLocal</strong>s,   因此它们是不存在并发竞争的。可以理解为每个线程有自己的变量副本;</p>
+<h4 id="Entry数组角标的散列算法"><a href="#Entry数组角标的散列算法" class="headerlink" title="Entry数组角标的散列算法"></a>Entry数组角标的散列算法</h4><p> 我们可以观察到，在ThreadLocalMap内部都是使用的一个&amp;操作来生成数组的下标，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">//这里对应哈希函数的一般操作步骤的第一步 </div><div class="line">int i = firstKey.threadLocalHashCode &amp; (INITIAL_CAPACITY - 1)</div></pre></td></tr></table></figure>
+<p>threadLocalHashCode是ThreadLocalMap中的一个常量，在ThreadLocal每次被实例时，都会累加0x61c88647，这个0x61c88647数值我们一般称作魔数，非常强大<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">// 这个数可以这样计算出来 ~(2^32 / 1.618) + 0b1 (这里 ^ 代表求幂操作)</div><div class="line">BigDecimal goldenRatioResult = BigDecimal.valueOf(Math.pow(2, 32)).divide(new BigDecimal(&quot;1.618&quot;), 0, ROUND_HALF_UP);</div><div class="line">int hashIncrenment = ~goldenRatioResult.intValue() + 0b1; // 等效于 Math.abs() 结果是 1640531527 也就是十六进制的 0x61c88647</div><div class="line">//其中需要注意的是1.618这个数又叫 黄金分割 (黄金分割也可以是0.618，0.618和1.618互为倒数，也就是1/1.618 = 0.618)，而这个黄金分割又是可以由斐波那契数列推导出来的：</div></pre></td></tr></table></figure></p>
+<p>得到的结果按位和 ThreadLocalMap 的容量-1 做 &amp; 操作。（这里实际上对应了哈希函数的一般操作步骤的第二步，也就是将第一步计算的值和哈希表的容量做取模操作。另外，这里ThreadLocalMap 的容量必须为2的幂，之所以有这样的规定，是因为，当求解 x % y 时，如果y = 2^n 那么取模操作可以转换为按位与操作 x &amp; (y - 1)，效率会比取模操作高，取模操作可以看作是除操作，而除操作是性能比较低的），其它的一些hash算法在得到hash值的情况下都是对数组lenth-1取模  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">当 lenth = 2n 时，X % length = X &amp; (length - 1)</div><div class="line">也就是说，长度为2的n次幂时，模运算 % 可以变换为按位与 &amp; 运算。</div><div class="line">比如：9 % 4 = 1，9的二进制是 1001 ,4-1 = 3,3的二进制是 0011。 9 &amp; 3 = 1001 &amp; 0011 = 0001 = 1</div><div class="line">再比如：12 % 8 = 4,12的二进制是 1100,8-1 = 7,7的二进制是 0111。12 &amp; 7 = 1100 &amp; 0111 = 0100 = 4</div><div class="line"></div><div class="line">一个十进制数对一个2n 的数取余，我们可以将这个十进制转换为二进制数，将这个二进制数右移n位，移掉的这 n 位数即是余数。</div><div class="line">而X &amp; (length - 1) 则是取这被移掉的n位数，可通过推论证明</div></pre></td></tr></table></figure>
+<h4 id="核心原理"><a href="#核心原理" class="headerlink" title="核心原理"></a>核心原理</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">HASH_INCREMENT=0x61c88647</div><div class="line">int hashCode = i*HASH_INCREMENT+HASH_INCREMENT;//每次递增HASH_INCREMENT=0x61c88647</div><div class="line">int index=hashCode &amp; (length-1))</div></pre></td></tr></table></figure>
+<h4 id="ThreadLocalMap内部实现介绍"><a href="#ThreadLocalMap内部实现介绍" class="headerlink" title="ThreadLocalMap内部实现介绍"></a>ThreadLocalMap内部实现介绍</h4><p>内部的Entry数组继承自WeakReference，ThreadLocal类型的key的弱引用防止内存泄漏,如上面说述，内部通过ThreadLocal的常量和数组lenth-1的hash散列来生成数组下标，进行值的存取。</p>
+<ul>
+<li><p>set</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">private void set(ThreadLocal&lt;?&gt; key, Object value) &#123;</div><div class="line">    Entry[] tab = table;</div><div class="line">    int len = tab.length;</div><div class="line">    int i = key.threadLocalHashCode &amp; (len-1);//获得散列值</div><div class="line">    for (Entry e = tab[i];</div><div class="line">         e != null;</div><div class="line">         e = tab[i = nextIndex(i, len)]) &#123;</div><div class="line">        ThreadLocal&lt;?&gt; k = e.get();</div><div class="line"></div><div class="line">        if (k == key) &#123;//key存在则替换value</div><div class="line">            e.value = value;</div><div class="line">            return;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        if (k == null) &#123;//k==null，则覆盖并清除等于key=null时的陈旧数据（key=null时，是因为弱引用被回收）</div><div class="line">            replaceStaleEntry(key, value, i);//将null值删除后，数组需要重新散列排列</div><div class="line">            return;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    tab[i] = new Entry(key, value);//没有存过，则直接存入</div><div class="line">    int sz = ++size;</div><div class="line">    if (!cleanSomeSlots(i, sz) &amp;&amp; sz &gt;= threshold)//数组长度超过限制，扩容重新排列</div><div class="line">        rehash();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>rehash</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">private void rehash() &#123;</div><div class="line">            expungeStaleEntries();//清理陈旧数据，key==null</div><div class="line"></div><div class="line">            // Use lower threshold for doubling to avoid hysteresis</div><div class="line">            if (size &gt;= threshold - threshold / 4)//清理完陈旧数据，如果&gt;= 3/4阀值,就执行扩容，避免迟滞</div><div class="line">                resize();</div><div class="line">        &#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>resize</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">private void resize() &#123;</div><div class="line">           Entry[] oldTab = table;</div><div class="line">           int oldLen = oldTab.length;</div><div class="line">           int newLen = oldLen * 2;</div><div class="line">           Entry[] newTab = new Entry[newLen];</div><div class="line">           int count = 0;</div><div class="line"></div><div class="line">           for (int j = 0; j &lt; oldLen; ++j) &#123;</div><div class="line">               Entry e = oldTab[j];</div><div class="line">               if (e != null) &#123;</div><div class="line">                   ThreadLocal&lt;?&gt; k = e.get();</div><div class="line">                   if (k == null) &#123;</div><div class="line">                       e.value = null; // Help the GC</div><div class="line">                   &#125; else &#123;</div><div class="line">                       int h = k.threadLocalHashCode &amp; (newLen - 1);//重新获取新数组散列下标</div><div class="line">                       while (newTab[h] != null)//如果此位置已存在，则一直往后挪，</div><div class="line">                           h = nextIndex(h, newLen);</div><div class="line">                       newTab[h] = e;</div><div class="line">                       count++;</div><div class="line">                   &#125;</div><div class="line">               &#125;</div><div class="line">           &#125;</div><div class="line"></div><div class="line">           setThreshold(newLen);//设置新的阈值（实际set方法用了2/3的newLen作为阈值）</div><div class="line">           size = count;</div><div class="line">           table = newTab;</div><div class="line">       &#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>remove</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">private void remove(ThreadLocal&lt;?&gt; key) &#123;</div><div class="line">           Entry[] tab = table;</div><div class="line">           int len = tab.length;</div><div class="line">           int i = key.threadLocalHashCode &amp; (len-1);</div><div class="line">           for (Entry e = tab[i];</div><div class="line">                e != null;</div><div class="line">                e = tab[i = nextIndex(i, len)]) &#123;//如果散列值下标没有找到此key，则一直往后挪</div><div class="line">               if (e.get() == key) &#123;</div><div class="line">                   e.clear();</div><div class="line">                   expungeStaleEntry(i);</div><div class="line">                   return;</div><div class="line">               &#125;</div><div class="line">           &#125;</div><div class="line">       &#125;</div></pre></td></tr></table></figure>
+<h4 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h4><p>如果在项目中有使用线程池，则需要在任务执行完后及时清除ThreadLocal，防止产生不符合预期的结果</p>
+<h4 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h4><p><a href="https://www.cnblogs.com/ysocean/p/9054804.html" target="_blank" rel="external">由HashMap哈希算法引出的求余%和与运算&amp;转换问题</a></p>
 
-        <div class="article-info info-on-right">
-          
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -194,171 +243,106 @@
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="http://s.jiathis.com/qrcode.php?url=http://yoursite.com/2019/08/01/ThreadLocal源码浅析/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/08/01/Message源码浅析/" class="archive-article-date">
-  	<time datetime="2019-08-01T10:33:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-08-01</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2019/08/01/Message源码浅析/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Message源码浅析</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
+        
+        
+    </div>
+</aside>
+
+
+
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/08/01/Message源码浅析/">Message源码浅析</a>
-    </h1>
+  
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">技术</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/07/31/Java锁之前世今生/" class="archive-article-date">
-  	<time datetime="2019-07-31T11:34:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-07-31</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/07/31/Java锁之前世今生/">Java锁之前世今生</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">技术</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/07/13/基于ASM的AOP编程/" class="archive-article-date">
-  	<time datetime="2019-07-13T15:34:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-07-13</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/07/13/基于ASM的AOP编程/">基于ASM的AOP编程</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">技术</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/22/win10+ubuntu18.04双硬盘系统踩坑指南/" class="archive-article-date">
-  	<time datetime="2019-04-22T05:53:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-22</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/22/win10+ubuntu18.04双硬盘系统踩坑指南/">win10+ubuntu18.04双硬盘系统踩坑指南</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">技术</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
 
 
           </div>
@@ -381,8 +365,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

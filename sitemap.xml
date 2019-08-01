@@ -2,6 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2019/08/01/ThreadLocal%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/</loc>
+    
+    <lastmod>2019-08-01T10:44:20.779Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2019/08/01/Message%E6%BA%90%E7%A0%81%E6%B5%85%E6%9E%90/</loc>
+    
+    <lastmod>2019-08-01T10:43:44.432Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2019/07/31/Java%E9%94%81%E4%B9%8B%E5%89%8D%E4%B8%96%E4%BB%8A%E7%94%9F/</loc>
     
     <lastmod>2019-07-31T11:51:22.786Z</lastmod>

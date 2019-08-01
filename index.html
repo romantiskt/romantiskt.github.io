@@ -155,6 +155,198 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-ThreadLocal源码浅析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/08/01/ThreadLocal源码浅析/">ThreadLocal源码浅析</a>
+    </h1>
+  
+
+        
+        <a href="/2019/08/01/ThreadLocal源码浅析/" class="archive-article-date">
+  	<time datetime="2019-08-01T10:33:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-08-01</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><p>ThreadLocal是一个实现了在不同线程保持一个变量副本的功能，使得在多线程的情况下，各线程保持的副本不受影响，ThreadLocal的原理很简单，就是在每个线程Thread中维护有一个map变量，我们为副本创建的ThreadLocal作为key,值当做value保存在这个map中，以此来实现线程间副本的独立</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">public static final ThreadLocal&lt;Integer&gt; local = new ThreadLocal&lt;Integer&gt;() &#123;</div><div class="line">        @Override</div><div class="line">        protected Integer initialValue() &#123;//可选择实现，是否给一个初始化值，此方法会被延迟调用，在第一次set,get时调用</div><div class="line">            return 0;</div><div class="line">        &#125;</div><div class="line">    &#125;;</div></pre></td></tr></table></figure>
+<h2 id="二、ThreadLocalMap"><a href="#二、ThreadLocalMap" class="headerlink" title="二、ThreadLocalMap"></a>二、ThreadLocalMap</h2><p>&nbsp;&nbsp;ThreadLocal提供了几个核心方法来实现值的存取:<strong>set、get、remove</strong>,这几个方法的实现都依托ThreadLocal中实现的静态内部类ThreadLocalMap；ThreadLocalMap是一个实现map存取功能的包装类，其中Entry类型数组table存储了线程中需要保存副本的数据，初始化长度16,超过3/4时则自动扩容为原来的2倍，Entry使用魔数0x61c88647来实现数组角标的散列<br>&nbsp;&nbsp;每个线程Thread都持有一个ThreadLocalMap实例<strong>threadLocal</strong>s,   因此它们是不存在并发竞争的。可以理解为每个线程有自己的变量副本;</p>
+<h4 id="Entry数组角标的散列算法"><a href="#Entry数组角标的散列算法" class="headerlink" title="Entry数组角标的散列算法"></a>Entry数组角标的散列算法</h4><p> 我们可以观察到，在ThreadLocalMap内部都是使用的一个&amp;操作来生成数组的下标，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">//这里对应哈希函数的一般操作步骤的第一步 </div><div class="line">int i = firstKey.threadLocalHashCode &amp; (INITIAL_CAPACITY - 1)</div></pre></td></tr></table></figure>
+<p>threadLocalHashCode是ThreadLocalMap中的一个常量，在ThreadLocal每次被实例时，都会累加0x61c88647，这个0x61c88647数值我们一般称作魔数，非常强大<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">// 这个数可以这样计算出来 ~(2^32 / 1.618) + 0b1 (这里 ^ 代表求幂操作)</div><div class="line">BigDecimal goldenRatioResult = BigDecimal.valueOf(Math.pow(2, 32)).divide(new BigDecimal(&quot;1.618&quot;), 0, ROUND_HALF_UP);</div><div class="line">int hashIncrenment = ~goldenRatioResult.intValue() + 0b1; // 等效于 Math.abs() 结果是 1640531527 也就是十六进制的 0x61c88647</div><div class="line">//其中需要注意的是1.618这个数又叫 黄金分割 (黄金分割也可以是0.618，0.618和1.618互为倒数，也就是1/1.618 = 0.618)，而这个黄金分割又是可以由斐波那契数列推导出来的：</div></pre></td></tr></table></figure></p>
+<p>得到的结果按位和 ThreadLocalMap 的容量-1 做 &amp; 操作。（这里实际上对应了哈希函数的一般操作步骤的第二步，也就是将第一步计算的值和哈希表的容量做取模操作。另外，这里ThreadLocalMap 的容量必须为2的幂，之所以有这样的规定，是因为，当求解 x % y 时，如果y = 2^n 那么取模操作可以转换为按位与操作 x &amp; (y - 1)，效率会比取模操作高，取模操作可以看作是除操作，而除操作是性能比较低的），其它的一些hash算法在得到hash值的情况下都是对数组lenth-1取模  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">当 lenth = 2n 时，X % length = X &amp; (length - 1)</div><div class="line">也就是说，长度为2的n次幂时，模运算 % 可以变换为按位与 &amp; 运算。</div><div class="line">比如：9 % 4 = 1，9的二进制是 1001 ,4-1 = 3,3的二进制是 0011。 9 &amp; 3 = 1001 &amp; 0011 = 0001 = 1</div><div class="line">再比如：12 % 8 = 4,12的二进制是 1100,8-1 = 7,7的二进制是 0111。12 &amp; 7 = 1100 &amp; 0111 = 0100 = 4</div><div class="line"></div><div class="line">一个十进制数对一个2n 的数取余，我们可以将这个十进制转换为二进制数，将这个二进制数右移n位，移掉的这 n 位数即是余数。</div><div class="line">而X &amp; (length - 1) 则是取这被移掉的n位数，可通过推论证明</div></pre></td></tr></table></figure>
+<h4 id="核心原理"><a href="#核心原理" class="headerlink" title="核心原理"></a>核心原理</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">HASH_INCREMENT=0x61c88647</div><div class="line">int hashCode = i*HASH_INCREMENT+HASH_INCREMENT;//每次递增HASH_INCREMENT=0x61c88647</div><div class="line">int index=hashCode &amp; (length-1))</div></pre></td></tr></table></figure>
+<h4 id="ThreadLocalMap内部实现介绍"><a href="#ThreadLocalMap内部实现介绍" class="headerlink" title="ThreadLocalMap内部实现介绍"></a>ThreadLocalMap内部实现介绍</h4><p>内部的Entry数组继承自WeakReference，ThreadLocal类型的key的弱引用防止内存泄漏,如上面说述，内部通过ThreadLocal的常量和数组lenth-1的hash散列来生成数组下标，进行值的存取。</p>
+<ul>
+<li><p>set</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">private void set(ThreadLocal&lt;?&gt; key, Object value) &#123;</div><div class="line">    Entry[] tab = table;</div><div class="line">    int len = tab.length;</div><div class="line">    int i = key.threadLocalHashCode &amp; (len-1);//获得散列值</div><div class="line">    for (Entry e = tab[i];</div><div class="line">         e != null;</div><div class="line">         e = tab[i = nextIndex(i, len)]) &#123;</div><div class="line">        ThreadLocal&lt;?&gt; k = e.get();</div><div class="line"></div><div class="line">        if (k == key) &#123;//key存在则替换value</div><div class="line">            e.value = value;</div><div class="line">            return;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        if (k == null) &#123;//k==null，则覆盖并清除等于key=null时的陈旧数据（key=null时，是因为弱引用被回收）</div><div class="line">            replaceStaleEntry(key, value, i);//将null值删除后，数组需要重新散列排列</div><div class="line">            return;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    tab[i] = new Entry(key, value);//没有存过，则直接存入</div><div class="line">    int sz = ++size;</div><div class="line">    if (!cleanSomeSlots(i, sz) &amp;&amp; sz &gt;= threshold)//数组长度超过限制，扩容重新排列</div><div class="line">        rehash();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>rehash</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">private void rehash() &#123;</div><div class="line">            expungeStaleEntries();//清理陈旧数据，key==null</div><div class="line"></div><div class="line">            // Use lower threshold for doubling to avoid hysteresis</div><div class="line">            if (size &gt;= threshold - threshold / 4)//清理完陈旧数据，如果&gt;= 3/4阀值,就执行扩容，避免迟滞</div><div class="line">                resize();</div><div class="line">        &#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>resize</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">private void resize() &#123;</div><div class="line">           Entry[] oldTab = table;</div><div class="line">           int oldLen = oldTab.length;</div><div class="line">           int newLen = oldLen * 2;</div><div class="line">           Entry[] newTab = new Entry[newLen];</div><div class="line">           int count = 0;</div><div class="line"></div><div class="line">           for (int j = 0; j &lt; oldLen; ++j) &#123;</div><div class="line">               Entry e = oldTab[j];</div><div class="line">               if (e != null) &#123;</div><div class="line">                   ThreadLocal&lt;?&gt; k = e.get();</div><div class="line">                   if (k == null) &#123;</div><div class="line">                       e.value = null; // Help the GC</div><div class="line">                   &#125; else &#123;</div><div class="line">                       int h = k.threadLocalHashCode &amp; (newLen - 1);//重新获取新数组散列下标</div><div class="line">                       while (newTab[h] != null)//如果此位置已存在，则一直往后挪，</div><div class="line">                           h = nextIndex(h, newLen);</div><div class="line">                       newTab[h] = e;</div><div class="line">                       count++;</div><div class="line">                   &#125;</div><div class="line">               &#125;</div><div class="line">           &#125;</div><div class="line"></div><div class="line">           setThreshold(newLen);//设置新的阈值（实际set方法用了2/3的newLen作为阈值）</div><div class="line">           size = count;</div><div class="line">           table = newTab;</div><div class="line">       &#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>remove</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">private void remove(ThreadLocal&lt;?&gt; key) &#123;</div><div class="line">           Entry[] tab = table;</div><div class="line">           int len = tab.length;</div><div class="line">           int i = key.threadLocalHashCode &amp; (len-1);</div><div class="line">           for (Entry e = tab[i];</div><div class="line">                e != null;</div><div class="line">                e = tab[i = nextIndex(i, len)]) &#123;//如果散列值下标没有找到此key，则一直往后挪</div><div class="line">               if (e.get() == key) &#123;</div><div class="line">                   e.clear();</div><div class="line">                   expungeStaleEntry(i);</div><div class="line">                   return;</div><div class="line">               &#125;</div><div class="line">           &#125;</div><div class="line">       &#125;</div></pre></td></tr></table></figure>
+<h4 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h4><p>如果在项目中有使用线程池，则需要在任务执行完后及时清除ThreadLocal，防止产生不符合预期的结果</p>
+<h4 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h4><p><a href="https://www.cnblogs.com/ysocean/p/9054804.html" target="_blank" rel="external">由HashMap哈希算法引出的求余%和与运算&amp;转换问题</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">技术</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2019/08/01/ThreadLocal源码浅析/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-Message源码浅析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/08/01/Message源码浅析/">Message源码浅析</a>
+    </h1>
+  
+
+        
+        <a href="/2019/08/01/Message源码浅析/" class="archive-article-date">
+  	<time datetime="2019-08-01T10:33:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-08-01</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>注意，本文基于Android9.0源码</p>
+<h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><p>&nbsp;&nbsp;Message是一个实现了Parcelable的可序列化通讯类，常应用于线程间和进程间通讯，我们可以把它看作消息的载体，从字面意思上也是这样体现的；其内部实现了一个message对象的复用池，可以有效地解决在高并发情况下的内存抖动问题，池的大小默认设置为50，当大于临界值时则会被抛弃不再复用，其内部使用链表的数据结构来实现，<br>基于Message的复用原理，我们一般通过Message的obtain方法来生成一个实例</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Message message = Message.obtain();</div><div class="line">message.what = 11;</div></pre></td></tr></table></figure>
+<h2 id="二、字段解析"><a href="#二、字段解析" class="headerlink" title="二、字段解析"></a>二、字段解析</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">public int what;//消息标签</div><div class="line">public int arg1;//携带参数</div><div class="line">public int arg2;//携带参数</div><div class="line">public Object obj;//携带对象</div><div class="line">public Messenger replyTo;//IPC的通信中使用</div><div class="line">static final int FLAG_IN_USE = 1 &lt;&lt; 0;//在使用</div><div class="line">static final int FLAG_ASYNCHRONOUS = 1 &lt;&lt; 1;//异步的</div><div class="line">static final int FLAGS_TO_CLEAR_ON_COPY_FROM = FLAG_IN_USE;//</div><div class="line">long when;//执行时间</div><div class="line">Bundle data;//传递对象</div><div class="line">Handler target;//消息分发对象</div><div class="line">Runnable callback;//消息回调对象</div><div class="line">private static boolean gCheckRecycle = true;//api 21以下默认为false</div><div class="line">... //其它省略</div></pre></td></tr></table></figure>
+<h2 id="三、对象池原理"><a href="#三、对象池原理" class="headerlink" title="三、对象池原理"></a>三、对象池原理</h2><p>静态变量sPool指向对象池的表头，next指向链表的下一个message  </p>
+<ul>
+<li>对象获取，从链中取出及断链</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">public static Message obtain() &#123;</div><div class="line">    synchronized (sPoolSync) &#123;//在每次获取message对象时，如果池不为null，则直接从池中返回，</div><div class="line">        if (sPool != null) &#123;//获取链表头，从链中断开</div><div class="line">            Message m = sPool;</div><div class="line">            sPool = m.next;</div><div class="line">            m.next = null;</div><div class="line">            m.flags = 0; // clear in-use flag</div><div class="line">            sPoolSize--;</div><div class="line">            return m;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    return new Message();//如果池中已无可复用对象，则直接new一个</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>对象回收，将对象放入常量池</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">void recycleUnchecked() &#123;</div><div class="line">   ... 省略(数据擦除操作)</div><div class="line">    synchronized (sPoolSync) &#123;</div><div class="line">        if (sPoolSize &lt; MAX_POOL_SIZE) &#123;//当小于最大容量时才会把对象放入池中等待复用</div><div class="line">            next = sPool;//插入链表头部</div><div class="line">            sPool = this;</div><div class="line">            sPoolSize++;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li><strong>内存抖动</strong><br>内存频繁的分配和回收，频繁的gc会导致UI卡顿，严重的时候导致out of memory error（内存超过分配的最大值）</li>
+</ul>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">技术</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2019/08/01/Message源码浅析/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-Java锁之前世今生" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1141,331 +1333,6 @@
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2018/05/07/生活/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-ProtocolBuffers" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/24/ProtocolBuffers/">Protocol Buffers使用及其源码浅析</a>
-    </h1>
-  
-
-        
-        <a href="/2018/04/24/ProtocolBuffers/" class="archive-article-date">
-  	<time datetime="2018-04-24T12:30:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-24</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h4><ul>
-<li>下载Protocol Buffers源码 <a href="https://developers.google.com/protocol-buffers/docs/javatutorial" target="_blank" rel="external">官网</a></li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">https://github.com/google/protobuf.git</div></pre></td></tr></table></figure>
-<ul>
-<li>编译源码</li>
-</ul>
-<ol>
-<li>进入protobuf/目录下</li>
-<li>./autogen.sh </li>
-<li>./configure </li>
-<li>make</li>
-<li>sudo make install</li>
-</ol>
-<ul>
-<li>执行完上面步骤后即可全局执行protoc命令</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">protoc --version  查看当前版本</div><div class="line">protoc --help     查看命令</div></pre></td></tr></table></figure>
-<ul>
-<li>编写 .proto文件</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">syntax = &quot;proto2&quot;;</div><div class="line">package protocal;</div><div class="line">option java_package = &quot;com.rolan.proto&quot;;</div><div class="line">option java_outer_classname = &quot;PersonEntity&quot;;</div><div class="line">message People &#123;</div><div class="line">    repeated Person person = 1;//可重复的，即数组</div><div class="line">    message Person &#123;</div><div class="line">        required int32 id = 1;</div><div class="line">        required int64 index = 2;</div><div class="line">        optional string guid=3;</div><div class="line">        required string name = 4;</div><div class="line">        optional string gender=5;</div><div class="line">        optional string company=6;</div><div class="line">        optional string email = 7;</div><div class="line">        repeated Friend friend = 8;</div><div class="line"></div><div class="line">        message Friend &#123;</div><div class="line">            required string id = 1;</div><div class="line">            required string name = 4;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<ul>
-<li>编译出java文件</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">protoc -I=. --java_out=. addressbook.proto</div></pre></td></tr></table></figure>
-<ul>
-<li>java层源码支持</li>
-</ul>
-<p>1.可自行根据源码中protocol/java 编译出jar包<br>2.build.gradle引入</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">implementation &apos;com.google.protobuf:protobuf-java:3.5.1&apos;</div></pre></td></tr></table></figure>
-<ul>
-<li>序列化</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">PersonEntity.People.Builder people = PersonEntity.People.newBuilder();</div><div class="line">       for (int i = 0; i &lt; sampleSize; i++) &#123;</div><div class="line">           PersonEntity.People.Person.Builder person = PersonEntity.People.Person.newBuilder();</div><div class="line">           PersonEntity.People.Person.Friend friend1 = PersonEntity.People.Person.Friend.newBuilder().setId(&quot;1111&quot;).setName(&quot;李四&quot;).build();</div><div class="line">           PersonEntity.People.Person.Friend friend2 = PersonEntity.People.Person.Friend.newBuilder().setId(&quot;2222&quot;).setName(&quot;张三&quot;).build();</div><div class="line">           PersonEntity.People.Person.Friend friend3 = PersonEntity.People.Person.Friend.newBuilder().setId(&quot;3333&quot;).setName(&quot;王五&quot;).build();</div><div class="line">           person.setId(i)</div><div class="line">                   .setIndex(i)</div><div class="line">                   .setGuid(&quot;guid&quot; + i)</div><div class="line">                   .setName(&quot;name:&quot; + i)</div><div class="line">                   .setGender(i % 2 == 0 ? &quot;男&quot; : &quot;女&quot;)</div><div class="line">                   .setCompany(&quot;加油宝：&quot; + i)</div><div class="line">                   .setEmail(&quot;sd@.com&quot;)</div><div class="line">                   .addFriend(friend1)</div><div class="line">                   .addFriend(friend2)</div><div class="line">                   .addFriend(friend3)</div><div class="line">                   .build();</div><div class="line">           people.addPerson(person);</div><div class="line">       &#125;</div><div class="line">       PersonEntity.People build = people.build();</div></pre></td></tr></table></figure>
-<ul>
-<li>反序列化</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">byte[] bytes = Utils.toByteArray(file);</div><div class="line">            long startTime = System.currentTimeMillis();</div><div class="line">            PersonEntity.People people = PersonEntity.People.parseFrom(bytes);</div><div class="line">            PersonEntity.People.Person person = people.getPerson(1);</div></pre></td></tr></table></figure>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">技术</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/04/24/ProtocolBuffers/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-Flatbuffers" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/04/18/Flatbuffers/">Flatbuffers使用及其源码浅析</a>
-    </h1>
-  
-
-        
-        <a href="/2018/04/18/Flatbuffers/" class="archive-article-date">
-  	<time datetime="2018-04-18T11:56:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2018-04-18</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="为什么要用flatbuffers-官网"><a href="#为什么要用flatbuffers-官网" class="headerlink" title="为什么要用flatbuffers 官网"></a>为什么要用flatbuffers <a href="https://google.github.io/flatbuffers/" target="_blank" rel="external">官网</a></h4><table>
-<thead>
-<tr>
-<th></th>
-<th>FlatBuffers (binary)</th>
-<th>Protocol Buffers LITE</th>
-<th>Rapid JSON</th>
-<th>FlatBuffers (JSON)</th>
-<th>pugixml</th>
-<th>Raw structs</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Decode + Traverse + Dealloc (1 million times, seconds)</td>
-<td>0.08</td>
-<td>302</td>
-<td>583</td>
-<td>105</td>
-<td>196</td>
-<td>0.02</td>
-</tr>
-<tr>
-<td>Decode / Traverse / Dealloc (breakdown)</td>
-<td>0 / 0.08 / 0</td>
-<td>220 / 0.15 / 81</td>
-<td>294 / 0.9 / 287</td>
-<td>70 / 0.08 / 35</td>
-<td>41 / 3.9 / 150</td>
-<td>0 / 0.02 / 0</td>
-</tr>
-<tr>
-<td>Encode (1 million times, seconds)</td>
-<td>3.2</td>
-<td>185</td>
-<td>650</td>
-<td>169</td>
-<td>273</td>
-<td>0.15</td>
-</tr>
-<tr>
-<td>Wire format size (normal / zlib, bytes)</td>
-<td>344 / 220</td>
-<td>228 / 174</td>
-<td>1475 / 322</td>
-<td>1029 / 298</td>
-<td>1137 / 341</td>
-<td>312 / 187</td>
-</tr>
-<tr>
-<td>Memory needed to store decoded wire (bytes / blocks)</td>
-<td>0 / 0</td>
-<td>760 / 20</td>
-<td>65689 / 4</td>
-<td>328 / 1</td>
-<td>34194 / 3</td>
-<td>0 / 0</td>
-</tr>
-<tr>
-<td>Transient memory allocated during decode (KB)</td>
-<td>0</td>
-<td>1</td>
-<td>131</td>
-<td>4</td>
-<td>34</td>
-<td>0</td>
-</tr>
-<tr>
-<td>Generated source code size (KB)</td>
-<td>4</td>
-<td>61</td>
-<td>0</td>
-<td>4</td>
-<td>0</td>
-<td>0</td>
-</tr>
-<tr>
-<td>Field access in handwritten traversal code</td>
-<td>typed accessors</td>
-<td>typed accessors</td>
-<td>manual error checking</td>
-<td>typed accessors</td>
-<td>manual error checking</td>
-<td>typed but no safety</td>
-</tr>
-<tr>
-<td>Library source code (KB)</td>
-<td>15</td>
-<td>some subset of 3800</td>
-<td>87</td>
-<td>43</td>
-<td>327</td>
-<td>0</td>
-</tr>
-</tbody>
-</table>
-<h4 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h4><ul>
-<li><p>下载flatbuffers源码</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">git clone https://github.com/google/flatbuffers.git</div></pre></td></tr></table></figure>
-</li>
-<li><p>cmake （源码中已包含cmake,也可自行下载）</p>
-</li>
-<li>编译出flatc</li>
-</ul>
-<p>进入 flatbuffers/<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">1.cmake -G &quot;Unix Makefiles&quot;</div><div class="line">2.make</div></pre></td></tr></table></figure></p>
-<h4 id="java层源码支持"><a href="#java层源码支持" class="headerlink" title="java层源码支持"></a>java层源码支持</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">1.可以将flatbufffers/java 中的源码copy进项目</div><div class="line"></div><div class="line"> 2.将源码打包成jar(此处选用mvn打包)</div></pre></td></tr></table></figure>
-<ul>
-<li>安装mvn</li>
-</ul>
-<p>1.去官网下载mvn源码<a href="http://mirrors.shu.edu.cn/apache/maven/maven-3/3.5.3/binaries/apache-maven-3.5.3-bin.tar.gz" target="_blank" rel="external">mvn下载</a></p>
-<p>2.在.bash_profile中加入如下配置<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">export M2_HOME=&quot;/Users/wangyang/apache-maven-3.5.3&quot;</div><div class="line"></div><div class="line">export PATH=&quot;$M2_HOME/bin:$PATH&quot;</div></pre></td></tr></table></figure></p>
-<p>3.进入flatbuffers/ </p>
-<blockquote>
-<p> 本质是将flatbuffers/java目录下源码打成jar，但是此目录下没有配置对应的pom.xml</p>
-</blockquote>
-<p>本人尝试自己编写pom文件失败后，最后发现flatbuffers/目录下有此配置文件，坑，在此目录下运行以下命令，会生成target文件夹，在target/文件中找到flatbuffers-java-1.9.0-sources.jar</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">mvn install</div></pre></td></tr></table></figure>
-<h4 id="scheme文件编写"><a href="#scheme文件编写" class="headerlink" title="scheme文件编写"></a>scheme文件编写</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">namespace com.rolan.MyGame;//在java中相当于包名</div><div class="line">include &quot;mydefinitions.fbs&quot;;//可引入其它的schemas</div><div class="line">attribute &quot;priority&quot;;//属性</div><div class="line"></div><div class="line">enum Color : byte &#123; Red = 1, Green, Blue &#125;//枚举</div><div class="line"></div><div class="line">union Any &#123; Monster, Weapon, Pickup &#125;//联合体，类比于enum和 struct</div><div class="line"></div><div class="line">struct Vec3 &#123;//类似于table，但它针对不再添加修改的情形，一些常量，比table内存占用小访问速度更快，</div><div class="line">  x:float;</div><div class="line">  y:float;</div><div class="line">  z:float;</div><div class="line">&#125;</div><div class="line"></div><div class="line">table Monster &#123;//table类似于object，只能在末尾添加新的字段，可以rename</div><div class="line">  pos:Vec3;</div><div class="line">  mana:short = 150;</div><div class="line">  hp:short = 100;</div><div class="line">  name:string;</div><div class="line">  friendly:bool = false (deprecated, priority: 1);//不能删除不再使用的字段，可用deprecated标志</div><div class="line">  inventory:[ubyte];//[types]: ubyte bool short int float double long</div><div class="line">  color:Color = Blue;</div><div class="line">  test:Any;</div><div class="line">&#125;</div><div class="line"></div><div class="line">root_type Monster;//根节点</div></pre></td></tr></table></figure>
-<h4 id="types"><a href="#types" class="headerlink" title="types"></a>types</h4><p> 括号里是别名</p>
-<ul>
-<li>8 bit: byte (int8), ubyte (uint8), bool</li>
-<li>16 bit: short (int16), ushort (uint16)</li>
-<li>32 bit: int (int32), uint (uint32), float (float32)</li>
-<li>64 bit: long (int64), ulong (uint64), double (float64)<h4 id="编译scheme文件"><a href="#编译scheme文件" class="headerlink" title="编译scheme文件"></a>编译scheme文件</h4></li>
-</ul>
-<p>根据schme文件编译生成java entity文件<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">flatc -j[--java] sample_schema.fbs</div></pre></td></tr></table></figure></p>
-<p>根据schme文件编译生成c++ 头文件</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">flatc -c[--cpp] sample_schema.fbs</div></pre></td></tr></table></figure>
-<p>根据.proto文件生成.fbs(将protobuffer格式转为flatbuffer)</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">flatc --proto Person.proto</div></pre></td></tr></table></figure>
-<p>根据.fbs文件和.bin文件生成json</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">flatc -t schema.fbs -- binary.bin</div></pre></td></tr></table></figure>
-<p>根据schme文件和 json数据文件生成所对应的flatbuffers格式的数据文件</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">flatc -b[--binary] sample_schema.fbs sample_json.json</div></pre></td></tr></table></figure>
-<p>了解其它相关命令<a href="http://google.github.io/flatbuffers/flatbuffers_guide_using_schema_compiler.html" target="_blank" rel="external">官方文档</a></p>
-<h4 id="序列化"><a href="#序列化" class="headerlink" title="序列化"></a>序列化</h4><p>以下面这个scheme为例<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">namespace com.rolan.entity;</div><div class="line">table PeopleList &#123;</div><div class="line">    peoples : [People];</div><div class="line">&#125;</div><div class="line"></div><div class="line">table People &#123;</div><div class="line">    id : string;</div><div class="line">    index : long;</div><div class="line">    guid : string;</div><div class="line">    name : string;</div><div class="line">    gender : string;</div><div class="line">    company : string;</div><div class="line">    email : string;</div><div class="line">    friends : [Friend];</div><div class="line">&#125;</div><div class="line"></div><div class="line">table Friend &#123;</div><div class="line">    id : long;</div><div class="line">    name : string;</div><div class="line">&#125;</div><div class="line"></div><div class="line">root_type PeopleList;</div></pre></td></tr></table></figure></p>
-<p>java层序列化到文件<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div></pre></td><td class="code"><pre><div class="line">FlatBufferBuilder builder = new FlatBufferBuilder(0);</div><div class="line">        int peopleList[] = new int[100];</div><div class="line">        for (int i = 0; i &lt; peopleList.length; i++) &#123;</div><div class="line">            int nameOffect1 = builder.createString(&quot;李四&quot;);</div><div class="line">            int nameOffect2 = builder.createString(&quot;张三&quot;);</div><div class="line">            int nameOffect3 = builder.createString(&quot;王五&quot;);</div><div class="line">            int friends[] = new int[3];</div><div class="line">            friends[0] = Friend.createFriend(builder, 3243544, nameOffect1);</div><div class="line">            friends[1] = Friend.createFriend(builder, 2341423, nameOffect2);</div><div class="line">            friends[2] = Friend.createFriend(builder, 1232432, nameOffect3);</div><div class="line">            int index = builder.createString(&quot;23412243&quot;);</div><div class="line">            int guid = builder.createString(&quot;xnvnsfsd&quot;);</div><div class="line">            int name = builder.createString(&quot;赵钱&quot;);</div><div class="line">            int gender = builder.createString(&quot;男&quot;);</div><div class="line">            int company = builder.createString(&quot;阿里妈妈&quot;);</div><div class="line">            int email = builder.createString(&quot;ye@163.com&quot;);</div><div class="line">            int friendsVector = People.createFriendsVector(builder, friends);</div><div class="line">            People.startPeople(builder);</div><div class="line">            People.addId(builder, index);</div><div class="line">            People.addIndex(builder, 3001);//001会被识别成int</div><div class="line">            People.addGuid(builder, guid);</div><div class="line">            People.addName(builder, name);</div><div class="line">            People.addGender(builder, gender);</div><div class="line">            People.addCompany(builder, company);</div><div class="line">            People.addEmail(builder, email);</div><div class="line">            People.addFriends(builder, friendsVector);</div><div class="line">            peopleList[i] = People.endPeople(builder);</div><div class="line">        &#125;</div><div class="line">        int peoplesVector = PeopleList.createPeoplesVector(builder, peopleList);</div><div class="line">        PeopleList.startPeopleList(builder);</div><div class="line">        PeopleList.addPeoples(builder, peoplesVector);</div><div class="line">        int endPeopleList = PeopleList.endPeopleList(builder);</div><div class="line">        builder.finish(endPeopleList);</div><div class="line"></div><div class="line">        ByteBuffer bb = builder.dataBuffer();</div><div class="line">        File file = new File(getCacheDir() + &quot;/test.bin&quot;);</div><div class="line">        try &#123;</div><div class="line">            FileOutputStream fo = new FileOutputStream(file);</div><div class="line">            fo.write(bb.array(), bb.position(), bb.remaining());</div><div class="line">            fo.close();</div><div class="line">        &#125; catch (FileNotFoundException e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125; catch (IOException e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div></pre></td></tr></table></figure></p>
-<p>java反序列化</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">File file = new File(getCacheDir() + &quot;/test.bin&quot;);</div><div class="line">       try &#123;</div><div class="line">           byte[] bytes = Utils.toByteArray(file);</div><div class="line">           ByteBuffer wrap = ByteBuffer.wrap(bytes);</div><div class="line">           PeopleList rootAsPeopleList = PeopleList.getRootAsPeopleList(wrap);</div><div class="line">           People peoples = rootAsPeopleList.peoples(1);//取第1个</div><div class="line">           String company = peoples.company();</div><div class="line">           int peopleLength = peoples.friendsLength();</div><div class="line">           Toast.makeText(this,peoples.company(),Toast.LENGTH_SHORT).show();</div><div class="line">       &#125; catch (IOException e) &#123;</div><div class="line">           e.printStackTrace();</div><div class="line">       &#125;</div></pre></td></tr></table></figure>
-<p>参考：<a href="http://coolpers.github.io/" target="_blank" rel="external">http://coolpers.github.io/</a><br><a href="https://www.jianshu.com/p/03a2e8918f8a" target="_blank" rel="external">https://www.jianshu.com/p/03a2e8918f8a</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">技术</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2018/04/18/Flatbuffers/">展开全文 >></a>
         </p>
       
 

@@ -6,18 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Archives: 2019 | rolan的Android之旅</title>
+  <title>Message源码浅析 | rolan的Android之旅</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Android开发者">
-<meta property="og:type" content="website">
-<meta property="og:title" content="rolan的Android之旅">
-<meta property="og:url" content="http://yoursite.com/archives/2019/index.html">
+  <meta name="description" content="注意，本文基于Android9.0源码 一、概述&amp;nbsp;&amp;nbsp;Message是一个实现了Parcelable的可序列化通讯类，常应用于线程间和进程间通讯，我们可以把它看作消息的载体，从字面意思上也是这样体现的；其内部实现了一个message对象的复用池，可以有效地解决在高并发情况下的内存抖动问题，池的大小默认设置为50，当大于临界值时则会被抛弃不再复用，其内部使用链表的数据结构来实现，">
+<meta name="keywords" content="技术">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Message源码浅析">
+<meta property="og:url" content="http://yoursite.com/2019/08/01/Message源码浅析/index.html">
 <meta property="og:site_name" content="rolan的Android之旅">
-<meta property="og:description" content="Android开发者">
+<meta property="og:description" content="注意，本文基于Android9.0源码 一、概述&amp;nbsp;&amp;nbsp;Message是一个实现了Parcelable的可序列化通讯类，常应用于线程间和进程间通讯，我们可以把它看作消息的载体，从字面意思上也是这样体现的；其内部实现了一个message对象的复用池，可以有效地解决在高并发情况下的内存抖动问题，池的大小默认设置为50，当大于临界值时则会被抛弃不再复用，其内部使用链表的数据结构来实现，">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-08-01T10:43:44.432Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="rolan的Android之旅">
-<meta name="twitter:description" content="Android开发者">
+<meta name="twitter:title" content="Message源码浅析">
+<meta name="twitter:description" content="注意，本文基于Android9.0源码 一、概述&amp;nbsp;&amp;nbsp;Message是一个实现了Parcelable的可序列化通讯类，常应用于线程间和进程间通讯，我们可以把它看作消息的载体，从字面意思上也是这样体现的；其内部实现了一个message对象的复用池，可以有效地解决在高并发情况下的内存抖动问题，池的大小默认设置为50，当大于临界值时则会被抛弃不再复用，其内部使用链表的数据结构来实现，">
   
     <link rel="alternative" href="/atom.xml" title="rolan的Android之旅" type="application/atom+xml">
   
@@ -153,36 +155,73 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
+            <article id="post-Message源码浅析" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
   
+    <h1 class="article-title" itemprop="name">
+      Message源码浅析
+    </h1>
   
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2019" class="archive-year">2019</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/08/01/ThreadLocal源码浅析/" class="archive-article-date">
+
+        
+        <a href="/2019/08/01/Message源码浅析/" class="archive-article-date">
   	<time datetime="2019-08-01T10:33:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-08-01</time>
 </a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/08/01/ThreadLocal源码浅析/">ThreadLocal源码浅析</a>
-    </h1>
-  
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>注意，本文基于Android9.0源码</p>
+<h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><p>&nbsp;&nbsp;Message是一个实现了Parcelable的可序列化通讯类，常应用于线程间和进程间通讯，我们可以把它看作消息的载体，从字面意思上也是这样体现的；其内部实现了一个message对象的复用池，可以有效地解决在高并发情况下的内存抖动问题，池的大小默认设置为50，当大于临界值时则会被抛弃不再复用，其内部使用链表的数据结构来实现，<br>基于Message的复用原理，我们一般通过Message的obtain方法来生成一个实例</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Message message = Message.obtain();</div><div class="line">message.what = 11;</div></pre></td></tr></table></figure>
+<h2 id="二、字段解析"><a href="#二、字段解析" class="headerlink" title="二、字段解析"></a>二、字段解析</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">public int what;//消息标签</div><div class="line">public int arg1;//携带参数</div><div class="line">public int arg2;//携带参数</div><div class="line">public Object obj;//携带对象</div><div class="line">public Messenger replyTo;//IPC的通信中使用</div><div class="line">static final int FLAG_IN_USE = 1 &lt;&lt; 0;//在使用</div><div class="line">static final int FLAG_ASYNCHRONOUS = 1 &lt;&lt; 1;//异步的</div><div class="line">static final int FLAGS_TO_CLEAR_ON_COPY_FROM = FLAG_IN_USE;//</div><div class="line">long when;//执行时间</div><div class="line">Bundle data;//传递对象</div><div class="line">Handler target;//消息分发对象</div><div class="line">Runnable callback;//消息回调对象</div><div class="line">private static boolean gCheckRecycle = true;//api 21以下默认为false</div><div class="line">... //其它省略</div></pre></td></tr></table></figure>
+<h2 id="三、对象池原理"><a href="#三、对象池原理" class="headerlink" title="三、对象池原理"></a>三、对象池原理</h2><p>静态变量sPool指向对象池的表头，next指向链表的下一个message  </p>
+<ul>
+<li>对象获取，从链中取出及断链</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">public static Message obtain() &#123;</div><div class="line">    synchronized (sPoolSync) &#123;//在每次获取message对象时，如果池不为null，则直接从池中返回，</div><div class="line">        if (sPool != null) &#123;//获取链表头，从链中断开</div><div class="line">            Message m = sPool;</div><div class="line">            sPool = m.next;</div><div class="line">            m.next = null;</div><div class="line">            m.flags = 0; // clear in-use flag</div><div class="line">            sPoolSize--;</div><div class="line">            return m;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    return new Message();//如果池中已无可复用对象，则直接new一个</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>对象回收，将对象放入常量池</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">void recycleUnchecked() &#123;</div><div class="line">   ... 省略(数据擦除操作)</div><div class="line">    synchronized (sPoolSync) &#123;</div><div class="line">        if (sPoolSize &lt; MAX_POOL_SIZE) &#123;//当小于最大容量时才会把对象放入池中等待复用</div><div class="line">            next = sPool;//插入链表头部</div><div class="line">            sPool = this;</div><div class="line">            sPoolSize++;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li><strong>内存抖动</strong><br>内存频繁的分配和回收，频繁的gc会导致UI卡顿，严重的时候导致out of memory error（内存超过分配的最大值）</li>
+</ul>
 
-        <div class="article-info info-on-right">
-          
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
@@ -194,171 +233,115 @@
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="http://s.jiathis.com/qrcode.php?url=http://yoursite.com/2019/08/01/Message源码浅析/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/08/01/Message源码浅析/" class="archive-article-date">
-  	<time datetime="2019-08-01T10:33:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-08-01</time>
-</a>
+<nav id="article-nav">
+  
+    <a href="/2019/08/01/ThreadLocal源码浅析/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          ThreadLocal源码浅析
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/07/31/Java锁之前世今生/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Java锁之前世今生</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
+        
+        
+    </div>
+</aside>
+
+
+
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/08/01/Message源码浅析/">Message源码浅析</a>
-    </h1>
+  
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">技术</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/07/31/Java锁之前世今生/" class="archive-article-date">
-  	<time datetime="2019-07-31T11:34:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-07-31</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/07/31/Java锁之前世今生/">Java锁之前世今生</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">技术</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/07/13/基于ASM的AOP编程/" class="archive-article-date">
-  	<time datetime="2019-07-13T15:34:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-07-13</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/07/13/基于ASM的AOP编程/">基于ASM的AOP编程</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">技术</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2019/04/22/win10+ubuntu18.04双硬盘系统踩坑指南/" class="archive-article-date">
-  	<time datetime="2019-04-22T05:53:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2019-04-22</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2019/04/22/win10+ubuntu18.04双硬盘系统踩坑指南/">win10+ubuntu18.04双硬盘系统踩坑指南</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">技术</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
 
 
           </div>
@@ -381,8 +364,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
